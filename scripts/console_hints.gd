@@ -1,8 +1,9 @@
 class_name ConsoleHints
 extends Node
 
-@onready var _input_writer : ConsoleWriter = $"../Input/CommandEdit"
-@export var buttons : Array[Button]
+@export var buttons: Array[Button]
+@onready var _input_writer: ConsoleWriter = $"../Input/CommandEdit"
+
 
 func _ready() -> void:
 	_input_writer.text_changed.connect(process_suggestions)
@@ -10,12 +11,13 @@ func _ready() -> void:
 		btn.pressed.connect(_on_hint_button_pressed.bind(btn))
 		btn.visible = false
 
+
 func process_suggestions(command: String) -> void:
 	if command == "":
 		_clear_buttons()
 		return
 
-	var all_commands: Array[String] = ConsoleCommands.get_commands()
+	var commands: Dictionary = ConsoleCommands.commands.get_commands()
 	var matches: Array[String] = []
 
 	var command_parts := command.split(";", false)
@@ -36,7 +38,10 @@ func process_suggestions(command: String) -> void:
 	user_prefix = user_prefix.to_lower()
 
 	# Find matches
-	for cmd in all_commands:
+	for cmd in commands.keys():
+		if commands[cmd].hidden:
+			continue
+
 		var cmd_name := str(cmd)
 		if cmd_name.begins_with("/"):
 			cmd_name = cmd_name.substr(1, cmd_name.length() - 1)
@@ -65,20 +70,22 @@ func _set_hint_buttons(hints_data: Array) -> void:
 		else:
 			buttons[i].visible = false
 
+
 func _clear_buttons() -> void:
 	for btn in buttons:
 		btn.visible = false
 
+
 func _on_hint_button_pressed(button: Button) -> void:
-	var commands: PackedStringArray = _input_writer.text.split(";", false) # PackedStringArray
+	var commands: PackedStringArray = _input_writer.text.split(";", false)  # PackedStringArray
 	commands[commands.size() - 1] = button.text
-	
+
 	var commands_final: String = ""
 	for cmd_id in range(0, commands.size()):
 		commands_final += commands[cmd_id]
-		if cmd_id != commands.size() -1:
+		if cmd_id != commands.size() - 1:
 			commands_final += ";"
-	
+
 	_input_writer.text = commands_final
 	_input_writer.emit_signal("text_changed", _input_writer.text)
 
@@ -86,14 +93,4 @@ func _on_hint_button_pressed(button: Button) -> void:
 func _sort_command_matches(a, b) -> int:
 	if a.length() < b.length():
 		return -1
-	elif a.length() > b.length():
-		return 1
-	else:
-		var a_lower := str(a).to_lower()
-		var b_lower := str(b).to_lower()
-		if a_lower < b_lower:
-			return -1
-		elif a_lower > b_lower:
-			return 1
-		else:
-			return 0
+	return 1

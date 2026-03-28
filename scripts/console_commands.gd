@@ -1,160 +1,187 @@
 class_name ConsoleCommands
-extends Node
 
-static var _registered_commands: Dictionary = {}
-static var _int_regex: RegEx = RegEx.new()
-static var _float_regex: RegEx = RegEx.new()
-
-func _init() -> void:
-	_int_regex.compile("^[+-]?\\d+$")
-	_float_regex.compile("^[+-]?((\\d+\\.\\d*)|(\\d*\\.\\d+)|\\d+)$")
-
-#region Public
-static func register_command(command_name: String, command_arguments: Array, command_action: Callable, description : String = "") -> void:
-	_registered_commands[command_name] = RegisteredCommand.new(command_arguments, command_action, description)
-
-static func run_command(controller: ConsoleController, command_full: String) -> void:
-	var commands = _split_commands(command_full)
-	for cmd in commands:
-		var tokens = _tokenize_command(cmd)
-		await _process_command(controller, tokens)
-
-static func get_commands() -> Array[String]:
-	var result: Array[String] = [] 
-	for key in _registered_commands.keys(): 
-		result.append(str(key)) 
-	return result
-	
-static func get_command_by_id(command_name : String) -> RegisteredCommand:
-	if _registered_commands.has(command_name):
-		return _registered_commands[command_name]
-	return null
-
-#endregion
-
-#region Private
-static func _split_commands(command_full: String) -> Array[String]:
-	var result: Array[String] = []
-	var current: String = ""
-	var in_quotes: bool = false
-
-	for c in command_full:
-		if c == '"':
-			in_quotes = not in_quotes
-		elif c == ';' and not in_quotes:
-			if current.strip_edges() != "":
-				result.append(current.strip_edges())
-			current = ""
-			continue
-		current += c
-
-	if current.strip_edges() != "":
-		result.append(current.strip_edges())
-
-	return result
+static var commands: Commands = Commands.new()
 
 
-static func _tokenize_command(command: String) -> Array[String]:
-	var regex = RegEx.new()
-	regex.compile('("[^"]+"|\\S+)')
-	var matches = regex.search_all(command)
-	var tokens: Array[String] = []
-
-	for m in matches:
-		var token = m.get_string(0)
-		if token.begins_with('"') and token.ends_with('"'):
-			token = token.substr(1, token.length() - 2)
-		tokens.append(token)
-
-	return tokens
-
-
-static func _parse_argument(raw_value: String, type_const: int) -> Variant:
-	match type_const:
-		TYPE_FLOAT:
-			if raw_value.is_valid_float():
-				return raw_value.to_float()
-		TYPE_INT:
-			if raw_value.is_valid_int():
-				return int(raw_value)
-		TYPE_BOOL:
-			var lower = raw_value.to_lower()
-			if lower in ["true", "1", "yes"]:
-				return true
-			elif lower in ["false", "0", "no"]:
-				return false
-		TYPE_STRING:
-			return raw_value
-	return null
+static func register_all() -> void:
+	commands.register("/sleep", {"time": TYPE_FLOAT}, cmd_sleep, "Sleeps for a given time")
+	commands.register(
+		"/exec", {"file_name": TYPE_STRING}, cmd_exec, "Executes a .cfg file containing commands"
+	)
+	commands.register(
+		"/load_mod", {"file_name": TYPE_STRING}, cmd_load_mod, "Loads a .pck mod file"
+	)
+	commands.register(
+		"/load_script",
+		{"file_name": TYPE_STRING},
+		cmd_load_script,
+		"Loads a .gd script and executes its 'run' function"
+	)
+	commands.register("/clear", {}, cmd_clear, "Clears console logs")
+	commands.register("/pause", {"pause": TYPE_BOOL}, cmd_pause, "Pauses and unpauses the game")
+	commands.register(
+		"/game-speed", {"time": TYPE_FLOAT}, cmd_game_speed, "Sets the current game speed"
+	)
+	commands.register("/fps-cap", {"cap": TYPE_INT}, cmd_fps_cap, "Limits the max game framerate")
+	commands.register("/vsync", {"state": TYPE_BOOL}, cmd_vsync_mode, "Turns vsync on and off")
+	commands.register("/monitor_info", {}, cmd_monitor_info, "Prints machine monitor info")
+	commands.register("/version", {}, cmd_version, "Prints the console version")
+	commands.register("/stats", {}, cmd_stats, "Prints game performance related stats")
+	commands.register("/network", {}, cmd_network, "Prints network related stats")
+	commands.register("/print", {"text": TYPE_STRING}, cmd_print, "Prints words into the console")
+	commands.register("/help", {}, cmd_help, "Lists the available commands")
 
 
-static func _type_to_string(type_const: int) -> String:
-	match type_const:
-		TYPE_INT:
-			return "int"
-		TYPE_FLOAT:
-			return "float"
-		TYPE_BOOL:
-			return "bool"
-		TYPE_STRING:
-			return "string"
-		_:
-			return "variant"
+static func cmd_sleep(handler: ConsoleHandler, args: Dictionary) -> void:
+	await handler.get_tree().create_timer(args["time"]).timeout
 
-static func _process_command(controller: ConsoleController, tokens: Array) -> void:
-	if tokens.is_empty() or not _registered_commands.has(tokens[0]):
-		controller.log_error("console", "Failed to execute command [i]%s[/i]" % tokens[0])
+
+static func cmd_exec(handler: ConsoleHandler, args: Dictionary) -> void:
+	var code = _read_file(args["file_name"])
+	if code == "":
+		handler.log_error("console", "File not found or invalid!")
 		return
+	commands.run(handler, code)
 
-	var cmd: RegisteredCommand = _registered_commands[tokens[0]]
 
-	if cmd.arguments.size() > 0 and cmd.arguments.size() != tokens.size() - 1:
-		controller.log_error("console", "Arguments for command [i]%s[/i] don't match" % tokens[0])
-		controller.log_info("console", "Expected:")
-		for argument in cmd.arguments:
-			controller.log_info("console", "	[i]%s[/i] (%s)" % [argument.argument_name, _type_to_string(argument.value_type)])
+static func cmd_load_mod(handler: ConsoleHandler, args: Dictionary) -> void:
+	var mod_file = ProjectSettings.globalize_path(args.get("file_name", ""))
+	if mod_file == "" or not FileAccess.file_exists(mod_file):
+		handler.log_warn("PCKLoader", "PCK file not found: %s" % mod_file)
 		return
-
-	var parsed_args: Dictionary = {}
-
-	for i in range(cmd.arguments.size()):
-		var arg_def: Argument = cmd.arguments[i]
-		var raw_value: String = tokens[i + 1]
-		var value = _parse_argument(raw_value, arg_def.value_type)
-
-		if value == null:
-			controller.log_error(
-				"console",
-				"Argument '%s' has invalid type. Expected %s" %
-				[arg_def.argument_name, _type_to_string(arg_def.value_type)]
-			)
-			return
-
-		parsed_args[arg_def.argument_name] = value
-	
-	# Simple commands can have simpler callable parameters
-	if cmd.arguments.size() > 0:
-		await cmd.action.call(controller, parsed_args)
+	if ProjectSettings.load_resource_pack(mod_file):
+		handler.log_info("PCKLoader", "Successfully loaded: %s" % mod_file)
 	else:
-		await cmd.action.call(controller)
+		handler.log_error("PCKLoader", "Failed to load PCK: %s" % mod_file)
 
-#endregion
 
-# Helper Classes
-class Argument:
-	var argument_name: String
-	var value_type: int = TYPE_STRING
+static func cmd_load_script(handler: ConsoleHandler, args: Dictionary) -> void:
+	var script_code = _read_file(args["file_name"])
+	if script_code == "":
+		handler.log_error("console", "File not found or invalid!")
+		return
+	handler.log_info("console", "Compiling %s..." % args["file_name"])
+	_run_text_script(handler, script_code)
 
-	func _init(_name: String = "", _type: int = TYPE_STRING) -> void:
-		argument_name = _name
-		value_type = _type
 
-class RegisteredCommand:
-	var arguments: Array
-	var action: Callable
-	var description: String
+static func cmd_clear(handler: ConsoleHandler, _args: Dictionary = {}) -> void:
+	handler.log_clear()
 
-	func _init(_args: Array, _action: Callable, _description: String = "") -> void:
-		arguments = _args.duplicate()
-		action = _action
-		description = _description
+
+static func cmd_pause(handler: ConsoleHandler, args: Dictionary) -> void:
+	var pause: bool = args.get("pause", true)
+	Engine.time_scale = 0.0 if pause else 1.0
+	handler.log_info("console", "Game paused: %s" % str(pause))
+
+
+static func cmd_fps_cap(handler: ConsoleHandler, args: Dictionary) -> void:
+	var cap: int = args.get("cap", 60)
+	Engine.max_fps = cap
+	handler.log_info("console", "Game max fps cap set to %d fps" % cap)
+
+
+static func cmd_vsync_mode(handler: ConsoleHandler, args: Dictionary) -> void:
+	var state: bool = args.get("state", false)
+	if state:
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
+	else:
+		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+	handler.log_info("console", "Game vsync: %s" % str(state))
+
+
+static func cmd_monitor_info(handler: ConsoleHandler, _args: Dictionary = {}) -> void:
+	var monitor_count = DisplayServer.get_screen_count()
+
+	for screen_index in range(monitor_count):
+		var resolution = DisplayServer.screen_get_size(screen_index)
+		var refresh_rate = DisplayServer.screen_get_refresh_rate(screen_index)
+		var dpi = DisplayServer.screen_get_dpi(screen_index)
+
+		handler.log_info("console", "Monitor %d info:" % screen_index)
+		handler.log_info("console", "  Resolution: %dx%d" % [resolution.x, resolution.y])
+		handler.log_info("console", "  Refresh Rate: %d Hz" % refresh_rate)
+		handler.log_info("console", "  DPI: %d" % dpi)
+		handler.log_info("console", "--------------------------------")
+
+
+static func cmd_game_speed(handler: ConsoleHandler, args: Dictionary) -> void:
+	var time: float = args.get("time", 1.0)
+	Engine.time_scale = time
+	handler.log_info("console", "Game speed set to: %s" % str(Engine.time_scale))
+
+
+static func cmd_version(handler: ConsoleHandler) -> void:
+	handler.log_info("console", "Console version: %s" % Console.get_version())
+
+
+static func cmd_stats(handler: ConsoleHandler) -> void:
+	handler.log_info("console", "Current FPS: %s" % str(Engine.get_frames_per_second()))
+	var size = DisplayServer.window_get_size()
+	handler.log_info("console", "Current resolution: %dx%d" % [size.x, size.y])
+
+
+static func cmd_network(handler: ConsoleHandler, _args: Dictionary = {}) -> void:
+	handler.log_info("console", "Machine network address: %s" % get_local_ip())
+
+
+static func cmd_print(handler: ConsoleHandler, args: Dictionary) -> void:
+	handler.log_info("console", args["text"])
+
+
+static func cmd_help(handler: ConsoleHandler, _args: Dictionary = {}) -> void:
+	var commands: Dictionary = commands.get_commands()
+	if commands.is_empty():
+		handler.log_error("console", " - No commands registered -")
+	else:
+		handler.log_rainbow("console", "Available commands:")
+		for cmd_name in commands.keys():
+			var cmd: Commands.RegisteredCommand = commands[cmd_name]
+			if cmd.hidden:
+				continue
+			var cmd_description: String = cmd.description
+			if cmd_description.is_empty():
+				handler.log_info("console", "  [i]%s[/i]" % [cmd_name])
+			else:
+				handler.log_info("console", "  [i]%s[/i] - (%s)" % [cmd_name, cmd_description])
+
+
+# ----------------------------
+# Private helpers
+# ----------------------------
+static func _read_file(relative_path: String) -> String:
+	if relative_path.is_empty():
+		return ""
+	var file_path: String
+	if OS.has_feature("editor"):
+		file_path = ProjectSettings.globalize_path("res://") + relative_path
+	else:
+		file_path = OS.get_executable_path().get_base_dir() + "/" + relative_path
+	var file = FileAccess.open(file_path, FileAccess.READ)
+	if file == null:
+		return ""
+	var content = file.get_as_text()
+	file.close()
+	return content
+
+
+static func get_local_ip() -> String:
+	for ip in IP.get_local_addresses():
+		if ip.count(".") == 3 and not ip.begins_with("127."):
+			if (
+				ip.begins_with("10.")
+				or ip.begins_with("192.168.")
+				or (ip.begins_with("172.") and int(ip.split(".")[1]) in range(16, 32))
+			):
+				return ip
+	return "127.0.0.1"
+
+
+static func _run_text_script(handler: ConsoleHandler, code: String) -> void:
+	var script = GDScript.new()
+	script.source_code = code
+	var error = script.reload()
+	if error == OK:
+		var instance = script.new()
+		instance.call("run", handler)
+	else:
+		handler.log_error("console", "Failed to compile script!")

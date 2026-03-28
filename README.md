@@ -1,106 +1,173 @@
 <pre>
-  ______     ______   ______     ______     __    __    
- /\  ___\   /\__  _\ /\  ___\   /\  == \   /\ "-./  \   
- \ \ \__ \  \/_/\ \/ \ \  __\   \ \  __<   \ \ \-./\ \  
-  \ \_____\    \ \_\  \ \_____\  \ \_\ \_\  \ \_\ \ \_\ 
+  ______     ______   ______     ______     __    __
+ /\  ___\   /\__  _\ /\  ___\   /\  == \   /\ "-./  \
+ \ \ \__ \  \/_/\ \/ \ \  __\   \ \  __<   \ \ \-./\ \
+  \ \_____\    \ \_\  \ \_____\  \ \_\ \_\  \ \_\ \ \_\
    \/_____/     \/_/   \/_____/   \/_/ /_/   \/_/  \/_/
 </pre>
 
+# GTERM - Godot Terminal
 
-# GTERM – Godot Terminal
+GTERM is an in-game developer console for Godot. It provides a popup terminal UI, a shared command registry, command history and suggestions, rich-text logging, and a small TCP service for remote command execution.
 
-GTERM is a custom in-game console for Godot designed for debugging, testing, and developer tools. 
-It allows developers to register and run commands, making it perfect for games or projects that need a flexible terminal interface.
+The current implementation is built around an autoload singleton named `Console`. On startup it registers built-in commands, spawns the console window, and starts the remote service on port `3939`.
 
----
+## Current Features
 
-Features
---------
+- Popup console window opened with `F12`
+- Built-in and custom command registration through `ConsoleCommands.commands.register(...)`
+- Multiple commands in one line using `;`
+- Quoted string arguments such as `/print "hello world"`
+- RichTextLabel log output with color and rainbow banner text
+- Input history with up/down arrow navigation
+- Prefix-based command suggestions in the UI
+- Remote command execution over TCP on port `3939`
 
-- Command registration system: Add commands dynamically using `register_command`.
-- Command parsing: Input strings are parsed with arguments and executed automatically.
-- Colored logs: Supports BBCode-style coloring ([color=green], [color=red], etc.) in logs.
-- Internal commands: Comes with a set of built-in commands for testing, debugging, and basic control.
-- Developer-friendly: Helper functions for logging, updating the display, and clearing logs.
+## Setup
 
----
+Add `addons/gterm/scripts/console.gd` as an AutoLoad singleton named `Console`.
 
-Installation
-------------
+This name matters because the implementation calls `Console.get_version()` and `Console.get_banner()` from other scripts.
 
-1. Copy the GTERM plugin folder into your Godot project:
+Once the autoload is active, GTERM will:
 
-   res://addons/gterm/
+- register the built-in commands
+- instantiate `addons/gterm/scenes/console.tscn`
+- start the remote service on port `3939`
 
-2. Enable the Console singleton in Godot:
+## Using The Console
 
-   Console → //gterm/scripts/console.gd
+Press `F12` to open the console window.
 
----
+Notes about the current behavior:
 
-Usage Example
--------------
+- `F12` opens the window, but does not toggle it closed
+- the close button hides the window
+- submitted commands are echoed into the log before execution
+- command history is available with the up/down arrow keys
 
-Register a custom command:
+## Command Syntax
 
-	Console.register_command("/greet", [Argument.new("name", TYPE_STRING)], func(controller: ConsoleController, args: Dictionary) -> void:
-		controller.log_info("console", "Hello, %s!" % args["name"])
-    )
+Commands are tokenized by spaces, with quoted strings preserved:
 
-Log messages:
-- controller.log_info("console", "Custom message here")
-- controller.log_warn("console", "Custom message here")
-- controller.log_error("console", "Custom message here")
+```text
+/print "hello world"
+```
 
----
+You can chain commands with semicolons:
 
-Built-in Internal Commands
---------------------------
+```text
+/print "one"; /print "two"
+```
 
-The following commands are registered automatically by GTERM:
+Argument handling is strict:
 
-- /sleep [time: float]  
-  Waits asynchronously for the given number of seconds and logs when done.
+- commands with declared arguments require the exact number of arguments
+- `TYPE_INT` and `TYPE_FLOAT` values must parse cleanly
+- `TYPE_BOOL` treats `true`, `1`, and `yes` as `true`; any other value becomes `false`
 
-- /loadmod [file_name: string]  
-  Logs that a mod file is being loaded.
+## Registering Custom Commands
 
-- /help  
-  Displays a list of available commands.
+Register commands through the shared registry:
 
-- /clear  
-  Clears the console output.
+```gdscript
+func _ready() -> void:
+	ConsoleCommands.commands.register(
+		"/sleep",
+		{"time": TYPE_FLOAT},
+		cmd_sleep,
+		"Sleeps for a given time"
+	)
 
-- /pause [pause: bool]  
-  Pauses or unpauses the game. If no argument is provided, defaults to true.
 
-- /set [node_path: string] [property: string] [value: string]  
-  Sets a property of a node dynamically.
+func cmd_sleep(handler: ConsoleHandler, args: Dictionary) -> void:
+	await handler.get_tree().create_timer(args["time"]).timeout
+	handler.log_info("game", "Finished sleeping")
+```
 
-- /version  
-  Logs the current console version.
+Action signatures supported by the current parser:
 
-- /fps  
-  Logs the current FPS.
+- commands with arguments: `func my_command(handler: ConsoleHandler, args: Dictionary) -> void`
+- commands without arguments: `func my_command(handler: ConsoleHandler) -> void`
 
-- /network  
-  Lists local IP addresses.
+Use the optional `hidden` flag when registering a command if it should be omitted from `/help` and the suggestion list.
 
-- /print [quote: string]  
-  Logs a custom string to the console.
+## Built-in Commands
 
----
+These commands are registered by `ConsoleCommands.register_all()`, plus one UI command added by the controller:
 
-Notes
------
+- `/sleep [time: float]`
+  Waits for the given number of seconds.
+- `/exec [file_name: string]`
+  Reads a text file and executes its contents as console commands.
+- `/load_mod [file_name: string]`
+  Loads a `.pck` resource pack.
+- `/load_script [file_name: string]`
+  Reads a `.gd` file, compiles it at runtime, and calls its `run(handler)` function.
+- `/clear`
+  Clears the console log.
+- `/pause [pause: bool]`
+  Sets `Engine.time_scale` to `0.0` when true, or `1.0` when false.
+- `/game-speed [time: float]`
+  Sets `Engine.time_scale` directly.
+- `/fps-cap [cap: int]`
+  Sets `Engine.max_fps`.
+- `/vsync [state: bool]`
+  Enables or disables VSync for the window.
+- `/monitor_info`
+  Prints resolution, refresh rate, and DPI for each monitor.
+- `/version`
+  Prints the current GTERM version.
+- `/stats`
+  Prints current FPS and window resolution.
+- `/network`
+  Prints the first detected private IPv4 address, or `127.0.0.1`.
+- `/print [text: string]`
+  Prints text to the console log.
+- `/help`
+  Lists all non-hidden registered commands.
+- `/center`
+  Re-centers the console window on screen.
 
-- Arguments are typed using Argument.new(name, TYPE_X), allowing automatic parsing and validation.
-- Commands can be asynchronous (like /wait) without freezing the game.
-- Console logging is unified and color-coded using controller.log_info(), where controller is the ConsoleController context.
+## File-Based Commands
 
----
+`/exec` and `/load_script` read from different base paths depending on runtime:
 
-License
--------
+- in the editor: relative to the project `res://` root
+- in exported builds: relative to the executable directory
 
-MIT License — free to use and modify.
+Examples:
+
+```text
+/exec scripts/dev_commands.cfg
+/load_script scripts/debug_runner.gd
+```
+
+For `/load_mod`, pass a path to a `.pck` file that `ProjectSettings.globalize_path(...)` can resolve.
+
+## Remote Access
+
+GTERM starts a TCP server on port `3939`.
+
+You can connect with `nc`:
+
+```text
+nc <machine-ip> 3939
+```
+
+Remote clients receive:
+
+- the startup banner
+- a short help hint
+- a `> ` prompt after each command
+
+Special remote-only commands:
+
+- `quit`
+- `exit`
+
+Remote output is sent as plain text lines. The current implementation strips the italic tags used by `/help` before sending.
+
+## Version
+
+The current version is `1.0.0`.

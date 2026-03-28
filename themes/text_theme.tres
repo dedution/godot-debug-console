@@ -1,7 +1,0 @@
-[gd_resource type="Theme" load_steps=2 format=3 uid="uid://b2c12ppu4s4lr"]
-
-[ext_resource type="FontFile" uid="uid://ltbm7va13t7p" path="res://godot-debug-console/fonts/RobotoMono-Regular.ttf" id="1_6ji6k"]
-
-[resource]
-default_font = ExtResource("1_6ji6k")
-default_font_size = 26
