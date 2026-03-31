@@ -46,7 +46,7 @@ func close_menu() -> void:
 
 
 func _input(event) -> void:
-	if event is InputEventKey and event.pressed and event.keycode == KEY_F12:
+	if event is InputEventKey and event.pressed and event.keycode == Console.TOGGLE_KEY:
 		if _window.visible:
 			close_menu()
 		else:

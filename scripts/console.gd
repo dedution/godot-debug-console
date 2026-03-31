@@ -1,17 +1,20 @@
 extends Node
 
+const TOGGLE_KEY: Key = KEY_F12
 const BANNER_PATH: String = "%s/../graphics/intro.txt"
-static var _welcome_banner: String = ""
+var _welcome_banner: String = ""
+
 var console_controller: ConsoleController = null
 var _service: ConsoleService = null
 
-
 func _enter_tree() -> void:
 	ConsoleCommands.register_all()
+	_welcome_banner = _load_banner()
 	_spawn_menu()
 	_start_service()
-	_welcome_banner = _load_banner()
 
+func _ready() -> void:
+	GStats.push_notification("GTerm version %s loaded!" % get_version(), GStatsNotifications.NotificationTypes.INFO)
 
 func _load_banner() -> String:
 	var script_folder: String = get_script().resource_path.get_base_dir()
