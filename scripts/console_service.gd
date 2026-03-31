@@ -9,13 +9,12 @@ var _clients: Array[ConsoleServiceClient]
 func start_service() -> void:
 	var err: int = _server.listen(SERVICE_PORT)
 	if err != OK:
-		push_warning("Could not listen on port %s" % SERVICE_PORT)
+		push_warning("GTERM service failed to listen on port %s" % SERVICE_PORT)
 		return
 		
-	print("Telnet server listening on port %s!" % SERVICE_PORT)
+	print("GTERM service listening on port %s!" % SERVICE_PORT)
 
 func _process(_delta):
-	# Accept new clients
 	if _server.is_connection_available():
 		var peer := _server.take_connection()
 		peer.set_no_delay(true)
