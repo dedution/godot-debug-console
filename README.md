@@ -14,11 +14,10 @@ The current implementation is built around an autoload singleton named `Console`
 
 ## Current Features
 
-- Popup console window opened with `F12`
 - Built-in and custom command registration through `ConsoleCommands.commands.register(...)`
 - Multiple commands in one line using `;`
 - Quoted string arguments such as `/print "hello world"`
-- RichTextLabel log output with color and rainbow banner text
+- RichTextLabel log output with types
 - Input history with up/down arrow navigation
 - Prefix-based command suggestions in the UI
 - Remote command execution over TCP on port `3939`
@@ -32,19 +31,12 @@ This name matters because the implementation calls `Console.get_version()` and `
 Once the autoload is active, GTERM will:
 
 - register the built-in commands
-- instantiate `addons/gterm/scenes/console.tscn`
+- instantiate the controller
 - start the remote service on port `3939`
 
 ## Using The Console
 
 Press `F12` to open the console window.
-
-Notes about the current behavior:
-
-- `F12` opens the window, but does not toggle it closed
-- the close button hides the window
-- submitted commands are echoed into the log before execution
-- command history is available with the up/down arrow keys
 
 ## Command Syntax
 
@@ -154,19 +146,6 @@ You can connect with `nc`:
 ```text
 nc <machine-ip> 3939
 ```
-
-Remote clients receive:
-
-- the startup banner
-- a short help hint
-- a `> ` prompt after each command
-
-Special remote-only commands:
-
-- `quit`
-- `exit`
-
-Remote output is sent as plain text lines. The current implementation strips the italic tags used by `/help` before sending.
 
 ## Version
 
