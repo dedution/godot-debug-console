@@ -28,6 +28,9 @@ func _add_command_to_history(command: String) -> void:
 func _on_input_field_gui_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
 		match event.keycode:
+			Key.KEY_F12:
+				Console.console_controller.close_menu()
+				accept_event()
 			Key.KEY_ENTER:
 				if text != "":
 					var command = text

@@ -7,9 +7,9 @@ extends ConsoleHandler
 
 
 func _ready() -> void:
-	_window.close_requested.connect(_close_menu)
+	_window.close_requested.connect(close_menu)
 	_writer.text_submit.connect(_on_input_submitted)
-	_close_menu()
+	close_menu()
 
 	# Register command to center window
 	ConsoleCommands.commands.register("/center", {}, _center_window, "Centers the console window")
@@ -40,14 +40,17 @@ func _open_menu() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 
-func _close_menu() -> void:
+func close_menu() -> void:
 	_window.visible = false
 	_window.gui_release_focus()
 
 
 func _input(event) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_F12:
-		_open_menu()
+		if _window.visible:
+			close_menu()
+		else:
+			_open_menu()
 
 
 func _on_input_submitted(command: String) -> void:

@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://dx0k1rnm7ghqv" path="res://addons/gterm/scripts/console_controller.gd" id="1_2mre8"]
 [ext_resource type="Theme" path="res://addons/gterm/themes/console_text_theme.tres" id="2_kirbc"]
 [ext_resource type="Texture2D" uid="uid://b8ad5dmrlpcn3" path="res://addons/gterm/graphics/console_indicator.png" id="3_es1fy"]
-[ext_resource type="AudioStream" uid="uid://ipoyb5w5ak6d" path="res://addons/gterm/audio/startup_console.wav" id="3_oumbf"]
 [ext_resource type="Script" uid="uid://bqqgsfdibecfs" path="res://addons/gterm/scripts/console_writer.gd" id="4_es1fy"]
 [ext_resource type="Script" uid="uid://bcfw7niumljx5" path="res://addons/gterm/scripts/console_hints.gd" id="4_umce0"]
 [ext_resource type="Script" uid="uid://c7nnxl7qshfw6" path="res://addons/gterm/scripts/console_logger.gd" id="5_es7mf"]
@@ -82,7 +81,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("5_es7mf")
-startup_sound = ExtResource("3_oumbf")
 audio_player = NodePath("AudioPlayer")
 
 [node name="Logs" type="RichTextLabel" parent="Window/Container/VBoxContainer/Logger" unique_id=1740848561]

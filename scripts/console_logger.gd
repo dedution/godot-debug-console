@@ -10,7 +10,6 @@ var _logs: Array[String] = []
 
 @onready var _command_logger: RichTextLabel = $Logs
 
-
 func open_console() -> void:
 	if startup_sound and audio_player:
 		audio_player.stream = startup_sound
@@ -27,7 +26,7 @@ func _print_intro() -> void:
 	# Animate the ascii art
 	var current_text = ""
 	var frame_count: int = 0
-	var chars_per_frame: int = 5
+	var chars_per_frame: int = 10
 	for char in ascii_art:
 		current_text += char
 		frame_count += 1

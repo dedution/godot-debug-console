@@ -2,7 +2,7 @@ extends Node
 
 const BANNER_PATH: String = "%s/../graphics/intro.txt"
 static var _welcome_banner: String = ""
-var _console_controller: ConsoleController = null
+var console_controller: ConsoleController = null
 var _service: ConsoleService = null
 
 
@@ -39,7 +39,7 @@ func _spawn_menu() -> void:
 	var packed_scene = load(parent_folder + "/%s/%s" % ["scenes", "console.tscn"])
 	var instance = packed_scene.instantiate()
 	add_child(instance)
-	_console_controller = instance
+	console_controller = instance
 
 
 func _start_service() -> void:
