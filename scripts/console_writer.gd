@@ -24,7 +24,7 @@ func _add_command_to_history(command: String) -> void:
 	if _command_history.size() > _command_history_max_size:
 		_command_history.remove_at(0)
 
-
+## TODO (FB): Pressing TAB for autocomplete
 func _on_input_field_gui_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
 		match event.keycode:
