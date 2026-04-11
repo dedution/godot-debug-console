@@ -1,6 +1,10 @@
 class_name ConsoleController
 extends ConsoleHandler
 
+const LOG_INFO_COLOR: String = "c3d8e9"
+const LOG_WARN_COLOR: String = "f1c458"
+const LOG_ERROR_COLOR: String = "ff8a99"
+
 @onready var _window: Window = $Window
 @onready var _writer: ConsoleWriter = $Window/Container/VBoxContainer/Input/CommandEdit
 @onready var _logger: ConsoleLogger = $Window/Container/VBoxContainer/Logger
@@ -71,17 +75,17 @@ func log_rainbow(log_tag: String, output: String) -> void:
 
 func log_info(log_tag: String, output: String) -> void:
 	if _logger:
-		_logger.add_log(log_tag, output, "white")
+		_logger.add_log(log_tag, output, LOG_INFO_COLOR)
 
 
 func log_warn(log_tag: String, output: String) -> void:
 	if _logger:
-		_logger.add_log(log_tag, output, "yellow")
+		_logger.add_log(log_tag, output, LOG_WARN_COLOR)
 
 
 func log_error(log_tag: String, output: String) -> void:
 	if _logger:
-		_logger.add_log(log_tag, output, "red")
+		_logger.add_log(log_tag, output, LOG_ERROR_COLOR)
 
 
 func log_clear() -> void:
