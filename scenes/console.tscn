@@ -7,7 +7,8 @@
 [ext_resource type="Script" uid="uid://bcfw7niumljx5" path="res://addons/gterm/scripts/console_hints.gd" id="4_umce0"]
 [ext_resource type="Script" uid="uid://c7nnxl7qshfw6" path="res://addons/gterm/scripts/console_logger.gd" id="5_es7mf"]
 [ext_resource type="FontFile" uid="uid://ltbm7va13t7p" path="res://addons/gterm/fonts/RobotoMono-Regular.ttf" id="6_kirbc"]
-[ext_resource type="StyleBox" uid="uid://b8ytggr3awhyv" path="res://addons/gterm/resources/stylebox_hints.tres" id="8_oumbf"]
+[ext_resource type="StyleBox" uid="uid://b8ytggr3awhyv" path="res://addons/gterm/themes/stylebox_hints_normal.tres" id="8_oumbf"]
+[ext_resource type="StyleBox" uid="uid://dtn0ffc056col" path="res://addons/gterm/themes/stylebox_hints_over.tres" id="9_r3t0u"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_close_normal"]
 bg_color = Color(0, 0, 0, 0)
@@ -270,6 +271,7 @@ layout_mode = 2
 theme_override_fonts/font = ExtResource("6_kirbc")
 theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = ExtResource("8_oumbf")
+theme_override_styles/pressed = ExtResource("8_oumbf")
+theme_override_styles/hover = ExtResource("9_r3t0u")
 text = "/command"
-flat = true
 alignment = 0

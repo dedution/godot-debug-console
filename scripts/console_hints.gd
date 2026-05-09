@@ -90,8 +90,17 @@ func _clear_buttons() -> void:
 
 
 func _on_hint_button_pressed(button: Button) -> void:
-	var commands: PackedStringArray = input_writer.text.split(";", false)  # PackedStringArray
-	commands[commands.size() - 1] = button.text
+	_complete_command(button.text)
+
+
+func _on_input_autocomplete() -> void:
+	if !buttons[0].text.is_empty():
+		_complete_command(buttons[0].text)
+
+
+func _complete_command(command: String):
+	var commands: PackedStringArray = input_writer.text.split(";", false)
+	commands[commands.size() - 1] = command
 
 	var commands_final: String = ""
 	for cmd_id in range(0, commands.size()):
@@ -106,8 +115,3 @@ func _sort_command_matches(a, b) -> int:
 	if a.length() < b.length():
 		return -1
 	return 1
-
-
-func _on_input_autocomplete() -> void:
-	if !buttons[0].text.is_empty():
-		input_writer.force_command(buttons[0].text)
