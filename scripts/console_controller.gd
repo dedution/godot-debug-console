@@ -4,11 +4,18 @@ extends ConsoleHandler
 const LOG_INFO_COLOR: String = "c3d8e9"
 const LOG_WARN_COLOR: String = "f1c458"
 const LOG_ERROR_COLOR: String = "ff8a99"
+const OPEN_ANIMATION_TIME: float = 0.26
+const OPEN_ANIMATION_OFFSET_Y: float = 18.0
+const OPEN_ANIMATION_START_SCALE: float = 0.96
+const OPEN_ANIMATION_OVERSHOOT_SCALE: float = 1.01
 
 var console_manager: Node
 @onready var _window: Window = $Window
 @onready var _writer: ConsoleWriter = $Window/Container/VBoxContainer/Input/CommandEdit
 @onready var _logger: ConsoleLogger = $Window/Container/VBoxContainer/Logger
+@onready var _content: VBoxContainer = $Window/Container/VBoxContainer
+
+var _open_tween: Tween = null
 
 
 func _ready() -> void:
@@ -46,8 +53,10 @@ func get_version() -> String:
 
 func open_menu() -> void:
 	_window.title = "GTerm - v%s" % get_version()
+	_logger.console_manager = console_manager
 	_window.visible = true
 	_center_window(null)
+	_play_open_animation()
 	_window.grab_focus()
 	_writer.grab_focus()
 	_logger.open_console()
@@ -57,6 +66,7 @@ func open_menu() -> void:
 func close_menu() -> void:
 	_window.visible = false
 	_window.gui_release_focus()
+	_reset_content_state()
 
 
 func _input(event) -> void:
@@ -103,3 +113,33 @@ func log_clear() -> void:
 		_logger.clear_log()
 
 #endregion
+
+
+func _play_open_animation() -> void:
+	_reset_content_state()
+	_content.pivot_offset = _content.size * 0.5
+	_content.modulate = Color(1, 1, 1, 0)
+	_content.position = Vector2(0, OPEN_ANIMATION_OFFSET_Y)
+	_content.scale = Vector2(OPEN_ANIMATION_START_SCALE, OPEN_ANIMATION_START_SCALE)
+
+	_open_tween = create_tween()
+	_open_tween.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	_open_tween.parallel().tween_property(_content, "modulate", Color.WHITE, OPEN_ANIMATION_TIME)
+	_open_tween.parallel().tween_property(_content, "position", Vector2.ZERO, OPEN_ANIMATION_TIME)
+	_open_tween.parallel().tween_property(
+		_content,
+		"scale",
+		Vector2(OPEN_ANIMATION_OVERSHOOT_SCALE, OPEN_ANIMATION_OVERSHOOT_SCALE),
+		OPEN_ANIMATION_TIME * 0.75
+	)
+	_open_tween.tween_property(_content, "scale", Vector2.ONE, OPEN_ANIMATION_TIME * 0.25)
+
+
+func _reset_content_state() -> void:
+	if _open_tween != null:
+		_open_tween.kill()
+		_open_tween = null
+
+	_content.modulate = Color.WHITE
+	_content.position = Vector2.ZERO
+	_content.scale = Vector2.ONE

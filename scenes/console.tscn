@@ -9,8 +9,10 @@
 [ext_resource type="FontFile" uid="uid://ltbm7va13t7p" path="res://addons/gterm/fonts/RobotoMono-Regular.ttf" id="6_kirbc"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kirbc"]
-content_margin_left = 6.0
-content_margin_top = 6.0
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2j26c"]
 
@@ -47,7 +49,7 @@ minimize_disabled = true
 maximize_disabled = true
 min_size = Vector2i(620, 750)
 max_size = Vector2i(1100, 1500)
-theme_override_colors/title_color = Color(0, 0.8527348, 0, 1)
+theme_override_colors/title_color = Color(0.470588, 0.890196, 0.729412, 1)
 
 [node name="Container" type="Control" parent="Window" unique_id=2140853130]
 layout_mode = 3
@@ -64,7 +66,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.184314, 0.184314, 0.184314, 1)
+color = Color(0.113725, 0.121569, 0.141176, 1)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Window/Container" unique_id=1089409257]
 layout_mode = 1
@@ -90,6 +92,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_colors/default_color = Color(0.858824, 0.894118, 0.933333, 1)
 theme_override_fonts/normal_font = ExtResource("6_kirbc")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_kirbc")
 text = "[GAME] executing scene loading
@@ -115,6 +118,7 @@ offset_right = 45.125
 offset_bottom = 11.335049
 grow_vertical = 2
 pivot_offset = Vector2(10, 10)
+modulate = Color(0.470588, 0.890196, 0.729412, 1)
 texture = ExtResource("3_es1fy")
 expand_mode = 1
 
@@ -127,6 +131,9 @@ offset_left = 63.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2_kirbc")
+theme_override_colors/caret_color = Color(0.470588, 0.890196, 0.729412, 1)
+theme_override_colors/font_placeholder_color = Color(0.560784, 0.607843, 0.682353, 1)
+theme_override_colors/selection_color = Color(0.254902, 0.32549, 0.34902, 1)
 theme_override_fonts/font = ExtResource("6_kirbc")
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxEmpty_2j26c")
@@ -167,7 +174,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.165657, 0.165656, 0.165656, 1)
+color = Color(0.0980392, 0.109804, 0.129412, 1)
 
 [node name="hints" type="TextEdit" parent="Window/Container/VBoxContainer/Hints/Root" unique_id=84305984]
 visible = false
@@ -215,7 +222,7 @@ custom_minimum_size = Vector2(0, 38.51)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("6_kirbc")
 theme_override_font_sizes/font_size = 16
-text = "/wait"
+text = ""
 flat = true
 alignment = 0
 
@@ -224,7 +231,7 @@ custom_minimum_size = Vector2(0, 38.51)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("6_kirbc")
 theme_override_font_sizes/font_size = 16
-text = "/wait"
+text = ""
 flat = true
 alignment = 0
 
@@ -233,6 +240,6 @@ custom_minimum_size = Vector2(0, 38.51)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("6_kirbc")
 theme_override_font_sizes/font_size = 16
-text = "/wait"
+text = ""
 flat = true
 alignment = 0
