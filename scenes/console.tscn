@@ -61,12 +61,14 @@ script = ExtResource("1_2mre8")
 
 [node name="Window" type="Window" parent="." unique_id=877467057]
 physics_interpolation_mode = 2
+transparent_bg = true
 anisotropic_filtering_level = 0
 oversampling_override = 1.0
 title = "GTerm"
 initial_position = 1
 size = Vector2i(620, 750)
 borderless = true
+transparent = true
 minimize_disabled = true
 maximize_disabled = true
 min_size = Vector2i(620, 750)
@@ -96,49 +98,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.113725, 0.121569, 0.141176, 1)
-
-[node name="BorderTop" type="ColorRect" parent="Window/Container/Chrome" unique_id=444088425]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 1.0
-grow_horizontal = 2
-color = Color(0.360784, 0.67451, 0.580392, 1)
-
-[node name="BorderLeft" type="ColorRect" parent="Window/Container/Chrome" unique_id=456542898]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_right = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.211765, 0.239216, 0.278431, 1)
-
-[node name="BorderRight" type="ColorRect" parent="Window/Container/Chrome" unique_id=1534255330]
-layout_mode = 1
-anchors_preset = 11
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -1.0
-grow_horizontal = 0
-grow_vertical = 2
-color = Color(0.211765, 0.239216, 0.278431, 1)
-
-[node name="BorderBottom" type="ColorRect" parent="Window/Container/Chrome" unique_id=781947379]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -1.0
-grow_horizontal = 2
-grow_vertical = 0
-color = Color(0.211765, 0.239216, 0.278431, 1)
+color = Color(0.11372549, 0.12156863, 0.14117648, 0.78431374)
 
 [node name="TitleBar" type="Control" parent="Window/Container/Chrome" unique_id=838032019]
 custom_minimum_size = Vector2(0, 34)
@@ -239,8 +199,6 @@ text = "[GAME] executing scene loading
 [GAME] preparing...."
 scroll_following = true
 
-[node name="AudioPlayer" type="AudioStreamPlayer" parent="Window/Container/Chrome/VBoxContainer/Logger" unique_id=592999704]
-
 [node name="Input" type="Control" parent="Window/Container/Chrome/VBoxContainer" unique_id=355856100]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
@@ -313,7 +271,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0980392, 0.109804, 0.129412, 1)
+color = Color(0.09803922, 0.10980392, 0.12941177, 0.5686275)
 
 [node name="hints" type="TextEdit" parent="Window/Container/Chrome/VBoxContainer/Hints/Root" unique_id=84305984]
 visible = false
@@ -379,87 +337,3 @@ theme_override_fonts/font = ExtResource("6_kirbc")
 theme_override_font_sizes/font_size = 16
 flat = true
 alignment = 0
-
-[node name="ResizeTopLeft" type="Control" parent="Window/Container" unique_id=402809657]
-layout_mode = 1
-anchors_preset = 0
-offset_right = 12.0
-offset_bottom = 12.0
-
-[node name="ResizeTop" type="Control" parent="Window/Container" unique_id=1803663525]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 12.0
-offset_right = -12.0
-offset_bottom = 6.0
-grow_horizontal = 2
-
-[node name="ResizeTopRight" type="Control" parent="Window/Container" unique_id=1648629773]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -12.0
-offset_bottom = 12.0
-grow_horizontal = 0
-
-[node name="ResizeLeft" type="Control" parent="Window/Container" unique_id=239999826]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_top = 12.0
-offset_right = 6.0
-offset_bottom = -12.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="ResizeRight" type="Control" parent="Window/Container" unique_id=1237634252]
-layout_mode = 1
-anchors_preset = 11
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -6.0
-offset_top = 12.0
-offset_bottom = -12.0
-grow_horizontal = 0
-grow_vertical = 2
-
-[node name="ResizeBottomLeft" type="Control" parent="Window/Container" unique_id=2082828679]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -12.0
-offset_right = 12.0
-grow_horizontal = 2
-grow_vertical = 0
-
-[node name="ResizeBottom" type="Control" parent="Window/Container" unique_id=1141339931]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = -6.0
-offset_right = -12.0
-grow_horizontal = 2
-grow_vertical = 0
-
-[node name="ResizeBottomRight" type="Control" parent="Window/Container" unique_id=184783791]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -12.0
-offset_top = -12.0
-grow_horizontal = 0
-grow_vertical = 0
