@@ -149,4 +149,4 @@ nc <machine-ip> 3939
 
 ## Version
 
-The current version is `1.0.0`.
+The current version is `1.0.1`.
