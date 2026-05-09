@@ -9,10 +9,10 @@ static func register_all() -> void:
 		"/exec", {"file_name": TYPE_STRING}, cmd_exec, "Executes a .cfg file containing commands"
 	)
 	commands.register(
-		"/load_mod", {"file_name": TYPE_STRING}, cmd_load_mod, "Loads a .pck mod file"
+		"/load-mod", {"file_name": TYPE_STRING}, cmd_load_mod, "Loads a .pck mod file"
 	)
 	commands.register(
-		"/load_script",
+		"/load-script",
 		{"file_name": TYPE_STRING},
 		cmd_load_script,
 		"Loads a .gd script and executes its 'run' function"
@@ -24,9 +24,9 @@ static func register_all() -> void:
 	)
 	commands.register("/fps-cap", {"cap": TYPE_INT}, cmd_fps_cap, "Limits the max game framerate")
 	commands.register("/vsync", {"state": TYPE_BOOL}, cmd_vsync_mode, "Turns vsync on and off")
-	commands.register("/monitor_info", {}, cmd_monitor_info, "Prints machine monitor info")
+	commands.register("/monitor-info", {}, cmd_monitor_info, "Prints machine monitor info")
 	commands.register("/stats", {}, cmd_stats, "Prints game performance related stats")
-	commands.register("/network", {}, cmd_network, "Prints network related stats")
+	commands.register("/net-stats", {}, cmd_network, "Prints network related stats")
 	commands.register("/print", {"text": TYPE_STRING}, cmd_print, "Prints words into the console")
 	commands.register("/help", {}, cmd_help, "Lists the available commands")
 
