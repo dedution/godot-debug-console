@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://bcfw7niumljx5" path="res://addons/gterm/scripts/console_hints.gd" id="4_umce0"]
 [ext_resource type="Script" uid="uid://c7nnxl7qshfw6" path="res://addons/gterm/scripts/console_logger.gd" id="5_es7mf"]
 [ext_resource type="FontFile" uid="uid://ltbm7va13t7p" path="res://addons/gterm/fonts/RobotoMono-Regular.ttf" id="6_kirbc"]
+[ext_resource type="StyleBox" uid="uid://b8ytggr3awhyv" path="res://addons/gterm/resources/stylebox_hints.tres" id="8_oumbf"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_close_normal"]
 bg_color = Color(0, 0, 0, 0)
@@ -41,11 +42,8 @@ content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hpx2j"]
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nak3p"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_es1fy"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_umce0"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s6w8m"]
+bg_color = Color(0.09803922, 0.10980392, 0.12941177, 0.78431374)
 
 [node name="Console" type="Control" unique_id=1017131194]
 process_mode = 3
@@ -83,7 +81,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Chrome" type="Control" parent="Window/Container" unique_id=615062163]
+[node name="Inner" type="Control" parent="Window/Container" unique_id=615062163]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -91,16 +89,18 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Background" type="ColorRect" parent="Window/Container/Chrome" unique_id=1766210254]
+[node name="Background" type="ColorRect" parent="Window/Container/Inner" unique_id=1766210254]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 34.0
+offset_bottom = -126.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.11372549, 0.12156863, 0.14117648, 0.78431374)
 
-[node name="TitleBar" type="Control" parent="Window/Container/Chrome" unique_id=838032019]
+[node name="TitleBar" type="Control" parent="Window/Container/Inner" unique_id=838032019]
 custom_minimum_size = Vector2(0, 34)
 layout_mode = 1
 anchors_preset = 10
@@ -108,7 +108,7 @@ anchor_right = 1.0
 offset_bottom = 34.0
 grow_horizontal = 2
 
-[node name="TitleBackground" type="ColorRect" parent="Window/Container/Chrome/TitleBar" unique_id=129530781]
+[node name="TitleBackground" type="ColorRect" parent="Window/Container/Inner/TitleBar" unique_id=129530781]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -118,7 +118,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.133333, 0.14902, 0.172549, 1)
 
-[node name="TitleDivider" type="ColorRect" parent="Window/Container/Chrome/TitleBar" unique_id=1807096156]
+[node name="TitleDivider" type="ColorRect" parent="Window/Container/Inner/TitleBar" unique_id=1807096156]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -130,7 +130,7 @@ grow_vertical = 0
 mouse_filter = 2
 color = Color(0.211765, 0.239216, 0.278431, 1)
 
-[node name="TitleLabel" type="Label" parent="Window/Container/Chrome/TitleBar" unique_id=1216334483]
+[node name="TitleLabel" type="Label" parent="Window/Container/Inner/TitleBar" unique_id=1216334483]
 layout_mode = 1
 offset_left = 12.0
 offset_top = 8.0
@@ -142,7 +142,7 @@ theme_override_font_sizes/font_size = 14
 text = "GTerm"
 vertical_alignment = 1
 
-[node name="CloseButton" type="Button" parent="Window/Container/Chrome/TitleBar" unique_id=699178062]
+[node name="CloseButton" type="Button" parent="Window/Container/Inner/TitleBar" unique_id=699178062]
 custom_minimum_size = Vector2(28, 24)
 layout_mode = 1
 anchors_preset = 1
@@ -164,27 +164,27 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_close_hover")
 theme_override_styles/focus = SubResource("StyleBoxFlat_close_hover")
 text = "X"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Window/Container/Chrome" unique_id=1089409257]
+[node name="VBoxContainer" type="VBoxContainer" parent="Window/Container/Inner" unique_id=1089409257]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 2.0
+anchors_preset = -1
+anchor_left = 0.003
+anchor_right = 0.99700004
+anchor_bottom = 0.832
+offset_left = 0.13999999
 offset_top = 34.0
-offset_right = -2.0
-offset_bottom = -2.0
+offset_right = -0.14001465
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Logger" type="Control" parent="Window/Container/Chrome/VBoxContainer" unique_id=2053756440]
+[node name="Logger" type="Control" parent="Window/Container/Inner/VBoxContainer" unique_id=2053756440]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("5_es7mf")
 
-[node name="Logs" type="RichTextLabel" parent="Window/Container/Chrome/VBoxContainer/Logger" unique_id=1740848561]
+[node name="Logs" type="RichTextLabel" parent="Window/Container/Inner/VBoxContainer/Logger" unique_id=1740848561]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -199,12 +199,12 @@ text = "[GAME] executing scene loading
 [GAME] preparing...."
 scroll_following = true
 
-[node name="Input" type="Control" parent="Window/Container/Chrome/VBoxContainer" unique_id=355856100]
+[node name="Input" type="Control" parent="Window/Container/Inner/VBoxContainer" unique_id=355856100]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CommandIndicator" type="TextureRect" parent="Window/Container/Chrome/VBoxContainer/Input" unique_id=765854691]
+[node name="CommandIndicator" type="TextureRect" parent="Window/Container/Inner/VBoxContainer/Input" unique_id=765854691]
 modulate = Color(0.470588, 0.890196, 0.729412, 1)
 layout_mode = 1
 anchors_preset = 4
@@ -219,7 +219,7 @@ pivot_offset = Vector2(10, 10)
 texture = ExtResource("3_es1fy")
 expand_mode = 1
 
-[node name="CommandEdit" type="LineEdit" parent="Window/Container/Chrome/VBoxContainer/Input" unique_id=865605725]
+[node name="CommandEdit" type="LineEdit" parent="Window/Container/Inner/VBoxContainer/Input" unique_id=865605725]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -249,91 +249,27 @@ caret_blink = true
 caret_blink_interval = 0.3
 script = ExtResource("4_es1fy")
 
-[node name="Hints" type="Control" parent="Window/Container/Chrome/VBoxContainer" unique_id=1984624911 node_paths=PackedStringArray("buttons")]
-clip_contents = true
-custom_minimum_size = Vector2(0, 125)
-layout_mode = 2
+[node name="Hints" type="PanelContainer" parent="Window/Container/Inner" unique_id=1005536899 node_paths=PackedStringArray("button_hint_template", "input_writer")]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.832
+anchor_right = 1.0
+anchor_bottom = 0.832
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_s6w8m")
 script = ExtResource("4_umce0")
-buttons = [NodePath("Root/SuggestionContainer/suggestion_bt_01"), NodePath("Root/SuggestionContainer/suggestion_bt_02"), NodePath("Root/SuggestionContainer/suggestion_bt_03")]
+button_hint_template = NodePath("SuggestionContainer/suggestion_bt_template")
+input_writer = NodePath("../VBoxContainer/Input/CommandEdit")
 
-[node name="Root" type="Control" parent="Window/Container/Chrome/VBoxContainer/Hints" unique_id=1786735935]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="SuggestionContainer" type="VBoxContainer" parent="Window/Container/Inner/Hints" unique_id=1693753756]
+layout_mode = 2
 
-[node name="Background" type="ColorRect" parent="Window/Container/Chrome/VBoxContainer/Hints/Root" unique_id=1559022144]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.09803922, 0.10980392, 0.12941177, 0.5686275)
-
-[node name="hints" type="TextEdit" parent="Window/Container/Chrome/VBoxContainer/Hints/Root" unique_id=84305984]
-visible = false
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.105
-anchor_right = 1.0
-anchor_bottom = 0.964
-offset_left = -0.005
-offset_bottom = -0.011
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("2_kirbc")
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxEmpty_nak3p")
-theme_override_styles/focus = SubResource("StyleBoxEmpty_es1fy")
-theme_override_styles/read_only = SubResource("StyleBoxEmpty_umce0")
-editable = false
-context_menu_enabled = false
-emoji_menu_enabled = false
-shortcut_keys_enabled = false
-selecting_enabled = false
-deselect_on_focus_loss_enabled = false
-drag_and_drop_selection_enabled = false
-middle_mouse_paste_enabled = false
-empty_selection_clipboard_enabled = false
-tab_input_mode = false
-virtual_keyboard_enabled = false
-virtual_keyboard_show_on_focus = false
-scroll_smooth = true
-use_default_word_separators = false
-
-[node name="SuggestionContainer" type="BoxContainer" parent="Window/Container/Chrome/VBoxContainer/Hints/Root" unique_id=1752771317]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.102
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-vertical = true
-
-[node name="suggestion_bt_01" type="Button" parent="Window/Container/Chrome/VBoxContainer/Hints/Root/SuggestionContainer" unique_id=533824846]
+[node name="suggestion_bt_template" type="Button" parent="Window/Container/Inner/Hints/SuggestionContainer" unique_id=1073958525]
 custom_minimum_size = Vector2(0, 38.51)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("6_kirbc")
 theme_override_font_sizes/font_size = 16
-flat = true
-alignment = 0
-
-[node name="suggestion_bt_02" type="Button" parent="Window/Container/Chrome/VBoxContainer/Hints/Root/SuggestionContainer" unique_id=1163515335]
-custom_minimum_size = Vector2(0, 38.51)
-layout_mode = 2
-theme_override_fonts/font = ExtResource("6_kirbc")
-theme_override_font_sizes/font_size = 16
-flat = true
-alignment = 0
-
-[node name="suggestion_bt_03" type="Button" parent="Window/Container/Chrome/VBoxContainer/Hints/Root/SuggestionContainer" unique_id=74906148]
-custom_minimum_size = Vector2(0, 38.51)
-layout_mode = 2
-theme_override_fonts/font = ExtResource("6_kirbc")
-theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = ExtResource("8_oumbf")
+text = "/command"
 flat = true
 alignment = 0

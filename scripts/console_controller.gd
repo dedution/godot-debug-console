@@ -10,20 +10,26 @@ const OPEN_ANIMATION_START_SCALE: float = 0.96
 const OPEN_ANIMATION_OVERSHOOT_SCALE: float = 1.01
 
 var console_manager: Node
-@onready var _window: Window = $Window
-@onready var _writer: ConsoleWriter = $Window/Container/Chrome/VBoxContainer/Input/CommandEdit
-@onready var _logger: ConsoleLogger = $Window/Container/Chrome/VBoxContainer/Logger
-
-## Borderless window and animation
-@onready var _content: Control = $Window/Container/Chrome
-@onready var _title_bar: Control = $Window/Container/Chrome/TitleBar
-@onready var _title_label: Label = $Window/Container/Chrome/TitleBar/TitleLabel
-@onready var _close_button: Button = $Window/Container/Chrome/TitleBar/CloseButton
 
 var _open_tween: Tween = null
 var _drag_active: bool = false
 var _drag_start_mouse_position: Vector2i = Vector2i.ZERO
 var _drag_start_window_position: Vector2i = Vector2i.ZERO
+
+## References to other console components
+@onready var _window: Window = $Window
+@onready var _writer: ConsoleWriter = $Window/Container/Inner/VBoxContainer/Input/CommandEdit
+@onready var _logger: ConsoleLogger = $Window/Container/Inner/VBoxContainer/Logger
+
+## Transparent elements
+@onready var _background: ColorRect = $Window/Container/Inner/Background
+@onready var _hints_panel: PanelContainer = $Window/Container/Inner/Hints
+
+## Borderless window and animation
+@onready var _content: Control = $Window/Container/Inner
+@onready var _title_bar: Control = $Window/Container/Inner/TitleBar
+@onready var _title_label: Label = $Window/Container/Inner/TitleBar/TitleLabel
+@onready var _close_button: Button = $Window/Container/Inner/TitleBar/CloseButton
 
 
 func _ready() -> void:
@@ -35,9 +41,23 @@ func _ready() -> void:
 	_title_bar.gui_input.connect(_on_title_bar_gui_input)
 	set_process(true)
 	close_menu()
+	_process_transparent_elements()
 
 	# Register command to center window
 	ConsoleCommands.commands.register("/center", {}, _center_window, "Centers the console window")
+
+
+func _process_transparent_elements() -> void:
+	if !console_manager:
+		return
+
+	# For color rect
+	_background.color.a = console_manager.get_transparency()
+
+	# For theme overrides like the hints panel
+	var style = _hints_panel.get_theme_stylebox("panel")
+	if style is StyleBoxFlat:
+		style.bg_color.a = console_manager.get_transparency()
 
 
 func _center_window(_handler: ConsoleHandler) -> void:
@@ -56,7 +76,7 @@ func _center_window(_handler: ConsoleHandler) -> void:
 
 
 func get_version() -> String:
-	if console_manager and console_manager.has_method("get_version"):
+	if console_manager:
 		return console_manager.get_version()
 
 	return ""
@@ -130,6 +150,7 @@ func log_error(log_tag: String, output: String) -> void:
 func log_clear() -> void:
 	if _logger:
 		_logger.clear_log()
+
 
 #endregion
 

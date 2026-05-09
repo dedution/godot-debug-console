@@ -1,7 +1,6 @@
 class_name ConsoleService
 extends Node
 
-const SERVICE_PORT: int = 3939
 var console_manager: Node
 var _server: TCPServer = TCPServer.new()
 var _clients: Array[ConsoleServiceClient]
@@ -9,15 +8,16 @@ var _clients: Array[ConsoleServiceClient]
 
 func _init(manager: Node):
 	console_manager = manager
+	self.name = "GTermRemoteService"
 
 
-func start_service() -> void:
-	var err: int = _server.listen(SERVICE_PORT)
+func start_service(service_port: int = 3939) -> void:
+	var err: int = _server.listen(service_port)
 	if err != OK:
-		push_warning("GTERM service failed to listen on port %s" % SERVICE_PORT)
+		push_warning("GTERM service failed to listen on port %s" % service_port)
 		return
 
-	print("GTERM service listening on port %s!" % SERVICE_PORT)
+	print("GTERM service listening on port %s!" % service_port)
 
 
 func _process(_delta):
