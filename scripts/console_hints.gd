@@ -1,8 +1,6 @@
 class_name ConsoleHints
 extends Node
 
-const MAX_DISPLAYED_SUGGESTIONS := 5
-
 @export var buttons: Array[Button]
 @onready var _input_writer: ConsoleWriter = $"../Input/CommandEdit"
 

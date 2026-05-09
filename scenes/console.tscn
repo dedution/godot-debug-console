@@ -8,6 +8,27 @@
 [ext_resource type="Script" uid="uid://c7nnxl7qshfw6" path="res://addons/gterm/scripts/console_logger.gd" id="5_es7mf"]
 [ext_resource type="FontFile" uid="uid://ltbm7va13t7p" path="res://addons/gterm/fonts/RobotoMono-Regular.ttf" id="6_kirbc"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_close_normal"]
+bg_color = Color(0, 0, 0, 0)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_close_pressed"]
+bg_color = Color(0.282353, 0.14902, 0.172549, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_close_hover"]
+bg_color = Color(0.188235, 0.223529, 0.262745, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kirbc"]
 content_margin_left = 10.0
 content_margin_top = 8.0
@@ -45,6 +66,7 @@ oversampling_override = 1.0
 title = "GTerm"
 initial_position = 1
 size = Vector2i(620, 750)
+borderless = true
 minimize_disabled = true
 maximize_disabled = true
 min_size = Vector2i(620, 750)
@@ -59,7 +81,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Background" type="ColorRect" parent="Window/Container" unique_id=1766210254]
+[node name="Chrome" type="Control" parent="Window/Container" unique_id=615062163]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="Window/Container/Chrome" unique_id=1766210254]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -68,24 +98,133 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.113725, 0.121569, 0.141176, 1)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Window/Container" unique_id=1089409257]
+[node name="BorderTop" type="ColorRect" parent="Window/Container/Chrome" unique_id=444088425]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 1.0
+grow_horizontal = 2
+color = Color(0.360784, 0.67451, 0.580392, 1)
+
+[node name="BorderLeft" type="ColorRect" parent="Window/Container/Chrome" unique_id=456542898]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.211765, 0.239216, 0.278431, 1)
+
+[node name="BorderRight" type="ColorRect" parent="Window/Container/Chrome" unique_id=1534255330]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1.0
+grow_horizontal = 0
+grow_vertical = 2
+color = Color(0.211765, 0.239216, 0.278431, 1)
+
+[node name="BorderBottom" type="ColorRect" parent="Window/Container/Chrome" unique_id=781947379]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -1.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0.211765, 0.239216, 0.278431, 1)
+
+[node name="TitleBar" type="Control" parent="Window/Container/Chrome" unique_id=838032019]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 34.0
+grow_horizontal = 2
+
+[node name="TitleBackground" type="ColorRect" parent="Window/Container/Chrome/TitleBar" unique_id=129530781]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+color = Color(0.133333, 0.14902, 0.172549, 1)
+
+[node name="TitleDivider" type="ColorRect" parent="Window/Container/Chrome/TitleBar" unique_id=1807096156]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -1.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+color = Color(0.211765, 0.239216, 0.278431, 1)
+
+[node name="TitleLabel" type="Label" parent="Window/Container/Chrome/TitleBar" unique_id=1216334483]
+layout_mode = 1
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 420.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(0.858824, 0.894118, 0.933333, 1)
+theme_override_fonts/font = ExtResource("6_kirbc")
+theme_override_font_sizes/font_size = 14
+text = "GTerm"
+vertical_alignment = 1
+
+[node name="CloseButton" type="Button" parent="Window/Container/Chrome/TitleBar" unique_id=699178062]
+custom_minimum_size = Vector2(28, 24)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -34.0
+offset_top = 5.0
+offset_right = -6.0
+offset_bottom = 29.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(0.858824, 0.894118, 0.933333, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.784314, 0.807843, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("6_kirbc")
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_close_normal")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_close_pressed")
+theme_override_styles/hover = SubResource("StyleBoxFlat_close_hover")
+theme_override_styles/focus = SubResource("StyleBoxFlat_close_hover")
+text = "X"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Window/Container/Chrome" unique_id=1089409257]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 2.0
+offset_top = 34.0
+offset_right = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Logger" type="Control" parent="Window/Container/VBoxContainer" unique_id=2053756440 node_paths=PackedStringArray("audio_player")]
+[node name="Logger" type="Control" parent="Window/Container/Chrome/VBoxContainer" unique_id=2053756440]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("5_es7mf")
-audio_player = NodePath("AudioPlayer")
 
-[node name="Logs" type="RichTextLabel" parent="Window/Container/VBoxContainer/Logger" unique_id=1740848561]
+[node name="Logs" type="RichTextLabel" parent="Window/Container/Chrome/VBoxContainer/Logger" unique_id=1740848561]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -100,14 +239,15 @@ text = "[GAME] executing scene loading
 [GAME] preparing...."
 scroll_following = true
 
-[node name="AudioPlayer" type="AudioStreamPlayer" parent="Window/Container/VBoxContainer/Logger" unique_id=592999704]
+[node name="AudioPlayer" type="AudioStreamPlayer" parent="Window/Container/Chrome/VBoxContainer/Logger" unique_id=592999704]
 
-[node name="Input" type="Control" parent="Window/Container/VBoxContainer" unique_id=355856100]
+[node name="Input" type="Control" parent="Window/Container/Chrome/VBoxContainer" unique_id=355856100]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="CommandIndicator" type="TextureRect" parent="Window/Container/VBoxContainer/Input" unique_id=765854691]
+[node name="CommandIndicator" type="TextureRect" parent="Window/Container/Chrome/VBoxContainer/Input" unique_id=765854691]
+modulate = Color(0.470588, 0.890196, 0.729412, 1)
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -118,11 +258,10 @@ offset_right = 45.125
 offset_bottom = 11.335049
 grow_vertical = 2
 pivot_offset = Vector2(10, 10)
-modulate = Color(0.470588, 0.890196, 0.729412, 1)
 texture = ExtResource("3_es1fy")
 expand_mode = 1
 
-[node name="CommandEdit" type="LineEdit" parent="Window/Container/VBoxContainer/Input" unique_id=865605725]
+[node name="CommandEdit" type="LineEdit" parent="Window/Container/Chrome/VBoxContainer/Input" unique_id=865605725]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -131,8 +270,8 @@ offset_left = 63.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2_kirbc")
-theme_override_colors/caret_color = Color(0.470588, 0.890196, 0.729412, 1)
 theme_override_colors/font_placeholder_color = Color(0.560784, 0.607843, 0.682353, 1)
+theme_override_colors/caret_color = Color(0.470588, 0.890196, 0.729412, 1)
 theme_override_colors/selection_color = Color(0.254902, 0.32549, 0.34902, 1)
 theme_override_fonts/font = ExtResource("6_kirbc")
 theme_override_font_sizes/font_size = 18
@@ -152,14 +291,14 @@ caret_blink = true
 caret_blink_interval = 0.3
 script = ExtResource("4_es1fy")
 
-[node name="Hints" type="Control" parent="Window/Container/VBoxContainer" unique_id=1984624911 node_paths=PackedStringArray("buttons")]
+[node name="Hints" type="Control" parent="Window/Container/Chrome/VBoxContainer" unique_id=1984624911 node_paths=PackedStringArray("buttons")]
 clip_contents = true
 custom_minimum_size = Vector2(0, 125)
 layout_mode = 2
 script = ExtResource("4_umce0")
 buttons = [NodePath("Root/SuggestionContainer/suggestion_bt_01"), NodePath("Root/SuggestionContainer/suggestion_bt_02"), NodePath("Root/SuggestionContainer/suggestion_bt_03")]
 
-[node name="Root" type="Control" parent="Window/Container/VBoxContainer/Hints" unique_id=1786735935]
+[node name="Root" type="Control" parent="Window/Container/Chrome/VBoxContainer/Hints" unique_id=1786735935]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -167,7 +306,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Background" type="ColorRect" parent="Window/Container/VBoxContainer/Hints/Root" unique_id=1559022144]
+[node name="Background" type="ColorRect" parent="Window/Container/Chrome/VBoxContainer/Hints/Root" unique_id=1559022144]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -176,7 +315,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.0980392, 0.109804, 0.129412, 1)
 
-[node name="hints" type="TextEdit" parent="Window/Container/VBoxContainer/Hints/Root" unique_id=84305984]
+[node name="hints" type="TextEdit" parent="Window/Container/Chrome/VBoxContainer/Hints/Root" unique_id=84305984]
 visible = false
 layout_mode = 1
 anchors_preset = -1
@@ -207,7 +346,7 @@ virtual_keyboard_show_on_focus = false
 scroll_smooth = true
 use_default_word_separators = false
 
-[node name="SuggestionContainer" type="BoxContainer" parent="Window/Container/VBoxContainer/Hints/Root" unique_id=1752771317]
+[node name="SuggestionContainer" type="BoxContainer" parent="Window/Container/Chrome/VBoxContainer/Hints/Root" unique_id=1752771317]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.102
@@ -217,29 +356,110 @@ grow_horizontal = 2
 grow_vertical = 2
 vertical = true
 
-[node name="suggestion_bt_01" type="Button" parent="Window/Container/VBoxContainer/Hints/Root/SuggestionContainer" unique_id=533824846]
+[node name="suggestion_bt_01" type="Button" parent="Window/Container/Chrome/VBoxContainer/Hints/Root/SuggestionContainer" unique_id=533824846]
 custom_minimum_size = Vector2(0, 38.51)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("6_kirbc")
 theme_override_font_sizes/font_size = 16
-text = ""
 flat = true
 alignment = 0
 
-[node name="suggestion_bt_02" type="Button" parent="Window/Container/VBoxContainer/Hints/Root/SuggestionContainer" unique_id=1163515335]
+[node name="suggestion_bt_02" type="Button" parent="Window/Container/Chrome/VBoxContainer/Hints/Root/SuggestionContainer" unique_id=1163515335]
 custom_minimum_size = Vector2(0, 38.51)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("6_kirbc")
 theme_override_font_sizes/font_size = 16
-text = ""
 flat = true
 alignment = 0
 
-[node name="suggestion_bt_03" type="Button" parent="Window/Container/VBoxContainer/Hints/Root/SuggestionContainer" unique_id=74906148]
+[node name="suggestion_bt_03" type="Button" parent="Window/Container/Chrome/VBoxContainer/Hints/Root/SuggestionContainer" unique_id=74906148]
 custom_minimum_size = Vector2(0, 38.51)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("6_kirbc")
 theme_override_font_sizes/font_size = 16
-text = ""
 flat = true
 alignment = 0
+
+[node name="ResizeTopLeft" type="Control" parent="Window/Container" unique_id=402809657]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 12.0
+offset_bottom = 12.0
+
+[node name="ResizeTop" type="Control" parent="Window/Container" unique_id=1803663525]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_right = -12.0
+offset_bottom = 6.0
+grow_horizontal = 2
+
+[node name="ResizeTopRight" type="Control" parent="Window/Container" unique_id=1648629773]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -12.0
+offset_bottom = 12.0
+grow_horizontal = 0
+
+[node name="ResizeLeft" type="Control" parent="Window/Container" unique_id=239999826]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = 12.0
+offset_right = 6.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ResizeRight" type="Control" parent="Window/Container" unique_id=1237634252]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -6.0
+offset_top = 12.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 2
+
+[node name="ResizeBottomLeft" type="Control" parent="Window/Container" unique_id=2082828679]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -12.0
+offset_right = 12.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="ResizeBottom" type="Control" parent="Window/Container" unique_id=1141339931]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -6.0
+offset_right = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="ResizeBottomRight" type="Control" parent="Window/Container" unique_id=184783791]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -12.0
+offset_top = -12.0
+grow_horizontal = 0
+grow_vertical = 0

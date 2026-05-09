@@ -11,11 +11,19 @@ const OPEN_ANIMATION_OVERSHOOT_SCALE: float = 1.01
 
 var console_manager: Node
 @onready var _window: Window = $Window
-@onready var _writer: ConsoleWriter = $Window/Container/VBoxContainer/Input/CommandEdit
-@onready var _logger: ConsoleLogger = $Window/Container/VBoxContainer/Logger
-@onready var _content: VBoxContainer = $Window/Container/VBoxContainer
+@onready var _writer: ConsoleWriter = $Window/Container/Chrome/VBoxContainer/Input/CommandEdit
+@onready var _logger: ConsoleLogger = $Window/Container/Chrome/VBoxContainer/Logger
+
+## Borderless window and animation
+@onready var _content: Control = $Window/Container/Chrome
+@onready var _title_bar: Control = $Window/Container/Chrome/TitleBar
+@onready var _title_label: Label = $Window/Container/Chrome/TitleBar/TitleLabel
+@onready var _close_button: Button = $Window/Container/Chrome/TitleBar/CloseButton
 
 var _open_tween: Tween = null
+var _drag_active: bool = false
+var _drag_start_mouse_position: Vector2i = Vector2i.ZERO
+var _drag_start_window_position: Vector2i = Vector2i.ZERO
 
 
 func _ready() -> void:
@@ -23,6 +31,9 @@ func _ready() -> void:
 	_logger.console_manager = console_manager
 	_window.close_requested.connect(close_menu)
 	_writer.text_submit.connect(_on_input_submitted)
+	_close_button.pressed.connect(close_menu)
+	_title_bar.gui_input.connect(_on_title_bar_gui_input)
+	set_process(true)
 	close_menu()
 
 	# Register command to center window
@@ -52,8 +63,7 @@ func get_version() -> String:
 
 
 func open_menu() -> void:
-	_window.title = "GTerm - v%s" % get_version()
-	_logger.console_manager = console_manager
+	_sync_window_title()
 	_window.visible = true
 	_center_window(null)
 	_play_open_animation()
@@ -67,6 +77,7 @@ func close_menu() -> void:
 	_window.visible = false
 	_window.gui_release_focus()
 	_reset_content_state()
+	_drag_active = false
 
 
 func _input(event) -> void:
@@ -75,6 +86,14 @@ func _input(event) -> void:
 			close_menu()
 		else:
 			open_menu()
+
+
+func _process(_delta: float) -> void:
+	if _drag_active:
+		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			_drag_active = false
+		else:
+			_update_window_drag()
 
 
 func _on_input_submitted(command: String) -> void:
@@ -143,3 +162,22 @@ func _reset_content_state() -> void:
 	_content.modulate = Color.WHITE
 	_content.position = Vector2.ZERO
 	_content.scale = Vector2.ONE
+
+
+func _sync_window_title() -> void:
+	var title := "GTerm - v%s" % get_version()
+	_window.title = title
+	_title_label.text = title
+
+
+func _on_title_bar_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_drag_active = true
+		_drag_start_mouse_position = DisplayServer.mouse_get_position()
+		_drag_start_window_position = _window.position
+		_title_bar.accept_event()
+
+
+func _update_window_drag() -> void:
+	var mouse_delta: Vector2i = DisplayServer.mouse_get_position() - _drag_start_mouse_position
+	_window.position = _drag_start_window_position + mouse_delta
