@@ -2,25 +2,26 @@ class_name ConsoleLogger
 extends Control
 
 const MAX_LOGS: int = 300
-
-@export var startup_sound: AudioStream
-@export var audio_player: AudioStreamPlayer
-
+var console_manager: Node
 var _logs: Array[String] = []
 
 @onready var _command_logger: RichTextLabel = $Logs
 
-func open_console() -> void:
-	if startup_sound and audio_player:
-		audio_player.stream = startup_sound
-		audio_player.play()
 
+func open_console() -> void:
 	_print_intro()
 
 
 func _print_intro() -> void:
+	# Fallback
+	if !console_manager or !console_manager.has_method("get_banner"):
+		_logs.clear()
+		_logs.append(rainbow_text("Welcome to GTERM."))
+		_update_display()
+		return
+
 	# Get the ascii art to animate and clear current logs
-	var ascii_art = Console.get_banner()
+	var ascii_art = console_manager.get_banner()
 	clear_log()
 
 	# Animate the ascii art

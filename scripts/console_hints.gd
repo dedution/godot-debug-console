@@ -1,12 +1,15 @@
 class_name ConsoleHints
 extends Node
 
+const MAX_DISPLAYED_SUGGESTIONS := 5
+
 @export var buttons: Array[Button]
 @onready var _input_writer: ConsoleWriter = $"../Input/CommandEdit"
 
 
 func _ready() -> void:
 	_input_writer.text_changed.connect(process_suggestions)
+	_input_writer.text_autocomplete.connect(_on_input_autocomplete)
 	for btn in buttons:
 		btn.pressed.connect(_on_hint_button_pressed.bind(btn))
 		btn.visible = false
@@ -86,11 +89,15 @@ func _on_hint_button_pressed(button: Button) -> void:
 		if cmd_id != commands.size() - 1:
 			commands_final += ";"
 
-	_input_writer.text = commands_final
-	_input_writer.emit_signal("text_changed", _input_writer.text)
+	_input_writer.force_command(commands_final)
 
 
 func _sort_command_matches(a, b) -> int:
 	if a.length() < b.length():
 		return -1
 	return 1
+
+
+func _on_input_autocomplete() -> void:
+	if !buttons[0].text.is_empty():
+		_input_writer.force_command(buttons[0].text)

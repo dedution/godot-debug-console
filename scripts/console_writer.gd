@@ -2,7 +2,9 @@ class_name ConsoleWriter
 extends LineEdit
 
 signal text_submit(text: String)
+signal text_autocomplete
 
+var console_controller: ConsoleController
 var _command_history: Array[String] = []
 var _command_history_max_size: int = 20
 var _history_index: int = -1
@@ -17,6 +19,13 @@ func command_history_update() -> void:
 	caret_column = text.length()
 
 
+func force_command(command: String) -> void:
+	text = command
+	caret_column = text.length()
+	text_changed.emit(text)
+	grab_focus()
+
+
 func _add_command_to_history(command: String) -> void:
 	if _command_history.size() == 0 or _command_history.get(_command_history.size() - 1) != command:
 		_command_history.append(command)
@@ -24,12 +33,16 @@ func _add_command_to_history(command: String) -> void:
 	if _command_history.size() > _command_history_max_size:
 		_command_history.remove_at(0)
 
-## TODO (FB): Pressing TAB for autocomplete
+
 func _on_input_field_gui_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
 		match event.keycode:
-			Console.TOGGLE_KEY:
-				Console.console_controller.close_menu()
+			Key.KEY_TAB:
+				text_autocomplete.emit()
+				accept_event()
+			Key.KEY_F12:
+				if console_controller:
+					console_controller.close_menu()
 				accept_event()
 			Key.KEY_ENTER:
 				if text != "":

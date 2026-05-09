@@ -5,12 +5,15 @@ const LOG_INFO_COLOR: String = "c3d8e9"
 const LOG_WARN_COLOR: String = "f1c458"
 const LOG_ERROR_COLOR: String = "ff8a99"
 
+var console_manager: Node
 @onready var _window: Window = $Window
 @onready var _writer: ConsoleWriter = $Window/Container/VBoxContainer/Input/CommandEdit
 @onready var _logger: ConsoleLogger = $Window/Container/VBoxContainer/Logger
 
 
 func _ready() -> void:
+	_writer.console_controller = self
+	_logger.console_manager = console_manager
 	_window.close_requested.connect(close_menu)
 	_writer.text_submit.connect(_on_input_submitted)
 	close_menu()
@@ -34,8 +37,15 @@ func _center_window(_handler: ConsoleHandler) -> void:
 		_window.popup_centered()
 
 
-func _open_menu() -> void:
-	_window.title = "GTerm - v%s" % Console.get_version()
+func get_version() -> String:
+	if console_manager and console_manager.has_method("get_version"):
+		return console_manager.get_version()
+
+	return ""
+
+
+func open_menu() -> void:
+	_window.title = "GTerm - v%s" % get_version()
 	_window.visible = true
 	_center_window(null)
 	_window.grab_focus()
@@ -50,11 +60,11 @@ func close_menu() -> void:
 
 
 func _input(event) -> void:
-	if event is InputEventKey and event.pressed and event.keycode == Console.TOGGLE_KEY:
+	if event is InputEventKey and event.pressed and event.keycode == KEY_F12:
 		if _window.visible:
 			close_menu()
 		else:
-			_open_menu()
+			open_menu()
 
 
 func _on_input_submitted(command: String) -> void:

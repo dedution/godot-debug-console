@@ -25,7 +25,6 @@ static func register_all() -> void:
 	commands.register("/fps-cap", {"cap": TYPE_INT}, cmd_fps_cap, "Limits the max game framerate")
 	commands.register("/vsync", {"state": TYPE_BOOL}, cmd_vsync_mode, "Turns vsync on and off")
 	commands.register("/monitor_info", {}, cmd_monitor_info, "Prints machine monitor info")
-	commands.register("/version", {}, cmd_version, "Prints the console version")
 	commands.register("/stats", {}, cmd_stats, "Prints game performance related stats")
 	commands.register("/network", {}, cmd_network, "Prints network related stats")
 	commands.register("/print", {"text": TYPE_STRING}, cmd_print, "Prints words into the console")
@@ -108,10 +107,6 @@ static func cmd_game_speed(handler: ConsoleHandler, args: Dictionary) -> void:
 	var time: float = args.get("time", 1.0)
 	Engine.time_scale = time
 	handler.log_info("console", "Game speed set to: %s" % str(Engine.time_scale))
-
-
-static func cmd_version(handler: ConsoleHandler) -> void:
-	handler.log_info("console", "Console version: %s" % Console.get_version())
 
 
 static func cmd_stats(handler: ConsoleHandler) -> void:
