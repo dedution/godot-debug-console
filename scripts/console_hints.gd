@@ -67,7 +67,8 @@ func process_suggestions(command: String) -> void:
 	if matches.has(parts[0]):
 		_clear_buttons()
 		return
-
+		
+	# Review this sorting...
 	if matches.size() > 0:
 		matches.sort_custom(_sort_command_matches)
 		_set_hint_buttons(matches)
@@ -111,7 +112,7 @@ func _complete_command(command: String):
 	input_writer.force_command(commands_final)
 
 
-func _sort_command_matches(a, b) -> int:
-	if a.length() < b.length():
-		return -1
-	return 1
+func _sort_command_matches(a: String, b: String) -> bool:
+	if a.length() == b.length():
+		return a.naturalnocasecmp_to(b) < 0
+	return a.length() < b.length()
