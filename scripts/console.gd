@@ -10,7 +10,8 @@ var _startup_banner: String = ""
 var _service: ConsoleService = null
 var _console_config: ConfigFile = ConfigFile.new()
 
-## Communication with game systems should be done with a SignalDispatcher for more versatility, never direct calls.
+## Communication with game systems should be done with a SignalDispatcher for more versatility,
+## never direct calls.
 ## This system should also be stripped from build release versions
 
 
@@ -78,6 +79,10 @@ func get_version() -> String:
 
 func get_transparency() -> float:
 	return _console_config.get_value("visual", "transparency_amount", 1.0)
+
+
+func get_editor_scale_multiplier() -> float:
+	return _console_config.get_value("visual", "editor_scale_multiplier", 1.0)
 
 
 func get_banner() -> String:

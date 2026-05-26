@@ -8,6 +8,19 @@ const OPEN_ANIMATION_TIME: float = 0.26
 const OPEN_ANIMATION_OFFSET_Y: float = 18.0
 const OPEN_ANIMATION_START_SCALE: float = 0.96
 const OPEN_ANIMATION_OVERSHOOT_SCALE: float = 1.01
+const BASE_WINDOW_SIZE: Vector2i = Vector2i(620, 750)
+const BASE_WINDOW_MAX_SIZE: Vector2i = Vector2i(1100, 1500)
+const EDITOR_SCALE_REFERENCE_SIZE: Vector2 = Vector2(1020, 1800)
+const EDITOR_SCALE_MAX: float = 1.9
+const EDITOR_WIDTH_SCALE_BOOST: float = 1.18
+const BASE_TITLE_HEIGHT: float = 34.0
+const BASE_LOG_BOTTOM_MARGIN: float = 126.0
+const BASE_INPUT_HEIGHT: float = 50.0
+const BASE_TITLE_FONT_SIZE: int = 14
+const BASE_CLOSE_FONT_SIZE: int = 15
+const BASE_LOG_FONT_SIZE: int = 18
+const BASE_INPUT_FONT_SIZE: int = 18
+const BASE_HINT_FONT_SIZE: int = 16
 
 var console_manager: Node
 
@@ -18,12 +31,17 @@ var _drag_start_window_position: Vector2i = Vector2i.ZERO
 
 ## References to other console components
 @onready var _window: Window = $Window
+@onready var _background: ColorRect = $Window/Container/Inner/Background
+@onready var _vbox: VBoxContainer = $Window/Container/Inner/VBoxContainer
+@onready var _input_container: Control = $Window/Container/Inner/VBoxContainer/Input
+@onready var _command_indicator: TextureRect = _input_container.get_node("CommandIndicator")
 @onready var _writer: ConsoleWriter = $Window/Container/Inner/VBoxContainer/Input/CommandEdit
 @onready var _logger: ConsoleLogger = $Window/Container/Inner/VBoxContainer/Logger
+@onready var _logs: RichTextLabel = $Window/Container/Inner/VBoxContainer/Logger/Logs
 
 ## Transparent elements
-@onready var _background: ColorRect = $Window/Container/Inner/Background
 @onready var _hints_panel: PanelContainer = $Window/Container/Inner/Hints
+@onready var _suggestion_container: VBoxContainer = _hints_panel.get_node("SuggestionContainer")
 
 ## Borderless window and animation
 @onready var _content: Control = $Window/Container/Inner
@@ -40,6 +58,7 @@ func _ready() -> void:
 	_close_button.pressed.connect(close_menu)
 	_title_bar.gui_input.connect(_on_title_bar_gui_input)
 	set_process(true)
+	_apply_editor_scaling()
 	close_menu()
 	_process_transparent_elements()
 
@@ -75,6 +94,84 @@ func _center_window(_handler: ConsoleHandler) -> void:
 		_window.popup_centered()
 
 
+func _apply_editor_scaling() -> void:
+	if not OS.has_feature("editor"):
+		return
+
+	var screen_size = get_viewport().get_visible_rect().size
+	var editor_scale = min(
+		screen_size.x / EDITOR_SCALE_REFERENCE_SIZE.x, screen_size.y / EDITOR_SCALE_REFERENCE_SIZE.y
+	)
+	
+	editor_scale = clampf(editor_scale, 1.0, EDITOR_SCALE_MAX)
+	editor_scale *= _get_editor_scale_multiplier()
+
+	var window_scale = Vector2(editor_scale * EDITOR_WIDTH_SCALE_BOOST, editor_scale)
+	_window.size = _scaled_window_size(BASE_WINDOW_SIZE, window_scale)
+	_window.min_size = _window.size
+	_window.max_size = _scaled_window_size(BASE_WINDOW_MAX_SIZE, window_scale)
+	_apply_editor_control_scaling(editor_scale)
+
+
+func _apply_editor_control_scaling(editor_scale: float) -> void:
+	_background.offset_top = BASE_TITLE_HEIGHT * editor_scale
+	_background.offset_bottom = -BASE_LOG_BOTTOM_MARGIN * editor_scale
+
+	_title_bar.custom_minimum_size = Vector2(0.0, BASE_TITLE_HEIGHT * editor_scale)
+	_title_bar.offset_bottom = BASE_TITLE_HEIGHT * editor_scale
+
+	_title_label.offset_left = 12.0 * editor_scale
+	_title_label.offset_top = 8.0 * editor_scale
+	_title_label.offset_right = 420.0 * editor_scale
+	_title_label.offset_bottom = 26.0 * editor_scale
+	_title_label.add_theme_font_size_override(
+		"font_size", roundi(BASE_TITLE_FONT_SIZE * editor_scale)
+	)
+
+	_close_button.custom_minimum_size = Vector2(28.0, 24.0) * editor_scale
+	_close_button.offset_left = -34.0 * editor_scale
+	_close_button.offset_top = 5.0 * editor_scale
+	_close_button.offset_right = -6.0 * editor_scale
+	_close_button.offset_bottom = 29.0 * editor_scale
+	_close_button.add_theme_font_size_override(
+		"font_size", roundi(BASE_CLOSE_FONT_SIZE * editor_scale)
+	)
+
+	_vbox.offset_top = BASE_TITLE_HEIGHT * editor_scale
+	_input_container.custom_minimum_size = Vector2(0.0, BASE_INPUT_HEIGHT * editor_scale)
+
+	_command_indicator.offset_left = 25.125 * editor_scale
+	_command_indicator.offset_top = -8.665001 * editor_scale
+	_command_indicator.offset_right = 45.125 * editor_scale
+	_command_indicator.offset_bottom = 11.335049 * editor_scale
+	_command_indicator.pivot_offset = Vector2(10.0, 10.0) * editor_scale
+
+	_writer.offset_left = 63.0 * editor_scale
+	_writer.add_theme_font_size_override("font_size", roundi(BASE_INPUT_FONT_SIZE * editor_scale))
+
+	_logs.add_theme_font_size_override(
+		"normal_font_size", roundi(BASE_LOG_FONT_SIZE * editor_scale)
+	)
+
+	for child in _suggestion_container.get_children():
+		if child is Button:
+			child.custom_minimum_size = Vector2(0.0, 38.51 * editor_scale)
+			child.add_theme_font_size_override(
+				"font_size", roundi(BASE_HINT_FONT_SIZE * editor_scale)
+			)
+
+
+func _scaled_window_size(size: Vector2i, scale: Vector2) -> Vector2i:
+	return Vector2i(roundi(size.x * scale.x), roundi(size.y * scale.y))
+
+
+func _get_editor_scale_multiplier() -> float:
+	if console_manager and console_manager.has_method("get_editor_scale_multiplier"):
+		return console_manager.get_editor_scale_multiplier()
+
+	return 1.0
+
+
 func get_version() -> String:
 	if console_manager:
 		return console_manager.get_version()
@@ -83,6 +180,7 @@ func get_version() -> String:
 
 
 func open_menu() -> void:
+	_apply_editor_scaling()
 	_sync_window_title()
 	_window.visible = true
 	_center_window(null)

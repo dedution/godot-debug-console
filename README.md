@@ -24,7 +24,13 @@ The default config lives at `addons/gterm/configs/settings.cfg`:
 [console]
 remote_port=3939
 version="1.0.1"
+
+[visual]
+transparency_amount=0.8
+editor_scale_multiplier=1.0
 ```
+
+`editor_scale_multiplier` only affects runs inside the Godot editor. Use values above `1.0` to make the console larger while testing unusual editor resolutions.
 
 ## Opening And Closing
 
