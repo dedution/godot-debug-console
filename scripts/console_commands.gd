@@ -140,23 +140,32 @@ static func cmd_help(handler: ConsoleHandler, _args: Dictionary = {}) -> void:
 				handler.log_info("console", "  [i]%s[/i] - (%s)" % [cmd_name, cmd_description])
 
 
-# ----------------------------
 # Private helpers
-# ----------------------------
 static func _read_file(relative_path: String) -> String:
 	if relative_path.is_empty():
 		return ""
-	var file_path: String
-	if OS.has_feature("editor"):
-		file_path = ProjectSettings.globalize_path("res://") + relative_path
-	else:
-		file_path = OS.get_executable_path().get_base_dir() + "/" + relative_path
+	var file_path = _resolve_file_path(relative_path)
+	if file_path.is_empty():
+		return ""
 	var file = FileAccess.open(file_path, FileAccess.READ)
 	if file == null:
 		return ""
 	var content = file.get_as_text()
 	file.close()
 	return content
+
+
+static func _resolve_file_path(relative_path: String) -> String:
+	if not OS.has_feature("editor"):
+		var executable_path = OS.get_executable_path().get_base_dir().path_join(relative_path)
+		if FileAccess.file_exists(executable_path):
+			return executable_path
+
+	var resource_path = "res://".path_join(relative_path)
+	if FileAccess.file_exists(resource_path):
+		return resource_path
+
+	return ""
 
 
 static func get_local_ip() -> String:
@@ -177,6 +186,6 @@ static func _run_text_script(handler: ConsoleHandler, code: String) -> void:
 	var error = script.reload()
 	if error == OK:
 		var instance = script.new()
-		instance.call("run", handler)
+		instance.call("run")
 	else:
 		handler.log_error("console", "Failed to compile script!")
