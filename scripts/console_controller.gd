@@ -102,7 +102,7 @@ func _apply_editor_scaling() -> void:
 	var editor_scale = min(
 		screen_size.x / EDITOR_SCALE_REFERENCE_SIZE.x, screen_size.y / EDITOR_SCALE_REFERENCE_SIZE.y
 	)
-	
+
 	editor_scale = clampf(editor_scale, 1.0, EDITOR_SCALE_MAX)
 	editor_scale *= _get_editor_scale_multiplier()
 

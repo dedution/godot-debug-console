@@ -115,11 +115,7 @@ That means a sidecar file next to the executable can override a packed file with
 
 ## Remote Service
 
-GTERM starts a TCP service on port `3939` by default. You can connect with a simple TCP client:
-
-```text
-nc <machine-ip> 3939
-```
+GTERM starts a websockets service on port `3939` by default and a web CLI interface on port `8080`.
 
 Once connected, type the same commands you would type in the in-game console. Use `/help` to list commands, or `exit` / `quit` to disconnect.
 

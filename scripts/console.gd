@@ -8,6 +8,7 @@ var console_controller: ConsoleController = null
 var _parent_folder: String
 var _startup_banner: String = ""
 var _service: ConsoleService = null
+var _web_client: ConsoleWebClient = null
 var _console_config: ConfigFile = ConfigFile.new()
 
 ## Communication with game systems should be done with a SignalDispatcher for more versatility,
@@ -27,6 +28,7 @@ func _enter_tree() -> void:
 	_register_commands()
 	_spawn_menu()
 	_start_service()
+	_start_web_interface()
 
 
 func _load_configs() -> void:
@@ -55,6 +57,21 @@ func _register_commands() -> void:
 
 func _cmd_version(handler: ConsoleHandler) -> void:
 	handler.log_info("console", "Console version: %s" % get_version())
+
+
+## New CLI interface using the web browser for better access
+func _start_web_interface() -> void:
+	var use_web_interface: bool = _console_config.get_value("console", "use_web_interface", true)
+	if not use_web_interface:
+		return
+
+	if _web_client == null:
+		_web_client = ConsoleWebClient.new(self)
+		add_child(_web_client)
+	_web_client.start_service(
+		_console_config.get_value("console", "web_port", 8080),
+		_console_config.get_value("console", "remote_port", 3939)
+	)
 
 
 func _start_service() -> void:

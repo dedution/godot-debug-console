@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GTERM Web CLI</title>
+
+    <style>
+      @font-face {
+        font-family: "GTermMono";
+        src: url("data:font/ttf;base64,___FONT_DATA___") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: block;
+      }
+
+      :root {
+        --bg: #07111f;
+        --line: rgba(106, 218, 255, 0.18);
+        --cyan: #63e6ff;
+        --cyan-soft: #a5f2ff;
+        --purple: #b990ff;
+        --pink: #ff87c8;
+        --text: #dff8ff;
+        --muted: #6d8fa4;
+        --good: #79ffa8;
+        --warn: #ffd479;
+        --error: #ff5c6c;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+
+        background:
+          radial-gradient(
+            circle at 50% 20%,
+            rgba(56, 129, 255, 0.12),
+            transparent 35%
+          ),
+          radial-gradient(
+            circle at 20% 90%,
+            rgba(169, 93, 255, 0.08),
+            transparent 30%
+          ),
+          var(--bg);
+
+        color: var(--text);
+
+        font-family:
+          "GTermMono", "Courier New", ui-monospace, SFMono-Regular, Menlo,
+          Monaco, Consolas, monospace;
+        font-weight: 400;
+
+        overflow: hidden;
+      }
+
+      .shell {
+        height: 100vh;
+        padding: 42px;
+      }
+
+      .terminal {
+        width: min(1100px, 100%);
+        height: calc(100vh - 84px);
+        position: relative;
+      }
+
+      .content {
+        height: 100%;
+        min-height: 0;
+
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+
+        gap: 26px;
+      }
+
+      .hero {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+
+        border-bottom: 1px solid var(--line);
+
+        padding-bottom: 24px;
+      }
+
+      .logo {
+        margin: 0;
+
+        font-family: "GTermMono", monospace;
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: 0;
+
+        white-space: pre;
+
+        filter: drop-shadow(0 0 12px rgba(99, 230, 255, 0.12));
+
+        user-select: none;
+      }
+
+      .banner-char {
+        color: hsl(var(--banner-hue) 100% 50%);
+      }
+
+      .connection-pill {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 2px;
+        padding: 6px 10px;
+        border: 1px solid rgba(255, 212, 121, 0.35);
+        border-radius: 999px;
+        color: var(--warn);
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      .connection-pill::before {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+        box-shadow: 0 0 8px currentColor;
+        content: "";
+      }
+
+      .connection-pill.connected {
+        border-color: rgba(121, 255, 168, 0.35);
+        color: var(--good);
+      }
+
+      .connection-pill.disconnected {
+        border-color: rgba(255, 135, 200, 0.35);
+        color: var(--pink);
+      }
+
+      .output {
+        min-height: 0;
+
+        overflow-y: auto;
+        overscroll-behavior: contain;
+
+        padding-right: 8px;
+
+        scroll-behavior: smooth;
+
+        scrollbar-width: thin;
+        scrollbar-color: rgba(99, 230, 255, 0.25) transparent;
+      }
+
+      .line {
+        min-height: 1.45em;
+
+        font-family: "GTermMono", monospace;
+        white-space: pre-wrap;
+        word-break: break-word;
+
+        font-size: 18px;
+        line-height: 1.45;
+
+        text-shadow: 0 0 9px rgba(99, 230, 255, 0.04);
+      }
+
+      .line.dim,
+      .line .dim {
+        color: var(--muted);
+      }
+
+      .line.good,
+      .line .good {
+        color: var(--good);
+      }
+
+      .line.normal,
+      .line .normal {
+        color: var(--text);
+      }
+
+      .line.warn,
+      .line .warn {
+        color: var(--warn);
+      }
+
+      .line.error,
+      .line .error {
+        color: var(--error);
+      }
+
+      .line.rainbow,
+      .line .rainbow {
+        background: linear-gradient(
+          90deg,
+          var(--pink),
+          var(--warn),
+          var(--good),
+          var(--cyan),
+          var(--purple),
+          var(--pink)
+        );
+        background-size: 240% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .line.command {
+        color: var(--cyan-soft);
+      }
+
+      .prompt-row {
+        min-height: 52px;
+
+        display: flex;
+        align-items: center;
+
+        padding: 12px 0 0;
+
+        border-top: 1px solid rgba(99, 230, 255, 0.16);
+
+        transition: border-color 0.2s ease;
+      }
+
+      .prompt-row:focus-within {
+        border-color: rgba(99, 230, 255, 0.42);
+      }
+
+      .prompt-sign {
+        color: var(--pink);
+
+        font-weight: bold;
+
+        margin-right: 10px;
+      }
+
+      #command {
+        flex: 1;
+
+        font-family: "GTermMono", monospace;
+        font-weight: 400;
+        background: transparent;
+
+        color: var(--text);
+
+        border: 0;
+        outline: 0;
+
+        font: inherit;
+
+        caret-color: var(--cyan);
+      }
+
+      .hint {
+        color: rgba(109, 143, 164, 0.72);
+
+        font-size: 11px;
+
+        margin-left: 10px;
+      }
+
+      .boot-cursor {
+        display: inline-block;
+
+        width: 8px;
+        height: 1em;
+
+        margin-left: 3px;
+
+        background: var(--cyan);
+
+        vertical-align: -2px;
+
+        animation: blink 0.9s steps(1) infinite;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .shell {
+          padding: 20px;
+        }
+
+        .terminal {
+          width: 100%;
+          height: calc(100vh - 40px);
+        }
+
+        .content {
+          height: 100%;
+        }
+
+        .hero {
+          min-height: auto;
+        }
+
+        .logo {
+          font-size: 18px;
+        }
+
+        .hint {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body data-machine-ip="___MACHINE_IP___" data-websocket-port="___WEBSOCKET_PORT___">
+    <main class="shell">
+      <section class="terminal">
+        <div class="content">
+          <header class="hero">
+            <pre class="logo" aria-label="GTERM">___BANNER_SECTION___</pre>
+            <span id="connection-pill" class="connection-pill">connecting</span>
+          </header>
+
+          <div id="output" class="output" aria-live="polite"></div>
+
+          <form id="cli-form" class="prompt-row" autocomplete="off">
+            <span class="prompt-sign"> ❯ </span>
+
+            <input
+              id="command"
+              type="text"
+              spellcheck="false"
+              autocomplete="off"
+              autofocus
+              placeholder="enter command…"
+            />
+
+            <span class="hint"> ↑↓ history · Enter execute </span>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        const output = document.getElementById("output");
+
+        const form = document.getElementById("cli-form");
+
+        const input = document.getElementById("command");
+
+        const history = [];
+
+        let historyIndex = 0;
+
+        const addLine = (text = "", cls = "") => {
+          const line = document.createElement("div");
+
+          line.className = `line ${cls}`.trim();
+
+          line.textContent = text;
+
+          output.appendChild(line);
+
+          output.scrollTo({
+            top: output.scrollHeight,
+            behavior: "smooth",
+          });
+
+          return line;
+        };
+
+        const addTaggedLine = (text = "") => {
+          const line = document.createElement("div");
+          line.className = "line";
+
+          const tagPattern = /\[color=(normal|good|warn|error|rainbow|dim)\]([\s\S]*?)\[\/color\]/g;
+          let cursor = 0;
+          let match;
+
+          while ((match = tagPattern.exec(text)) !== null) {
+            if (match.index > cursor) {
+              line.appendChild(document.createTextNode(text.slice(cursor, match.index)));
+            }
+
+            const colored = document.createElement("span");
+            colored.className = match[1];
+            colored.textContent = match[2];
+            line.appendChild(colored);
+            cursor = tagPattern.lastIndex;
+          }
+
+          if (cursor < text.length) {
+            line.appendChild(document.createTextNode(text.slice(cursor)));
+          }
+
+          output.appendChild(line);
+          output.scrollTo({
+            top: output.scrollHeight,
+            behavior: "smooth",
+          });
+        };
+
+        const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+        const machineIp = document.body.dataset.machineIp;
+        const websocketPort = document.body.dataset.websocketPort;
+        const websocketUrl = `ws://${machineIp}:${websocketPort}`;
+        const connectionPill = document.getElementById("connection-pill");
+        let socket = null;
+        let reconnectTimer = null;
+        let reconnectAttempt = 0;
+        let intentionallyClosed = false;
+
+        function setConnectionState(state, label) {
+          connectionPill.className = `connection-pill ${state}`.trim();
+          connectionPill.textContent = label;
+        }
+
+        function connect() {
+          if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
+            return;
+          }
+
+          addLine(`connecting to ${websocketUrl}...`, "dim");
+          setConnectionState("", "connecting");
+          socket = new WebSocket(websocketUrl);
+
+          socket.addEventListener("open", () => {
+            reconnectAttempt = 0;
+            setConnectionState("connected", "connected");
+            addLine("GTERM: connected", "good");
+            addLine('Type "/help" for available commands.');
+            
+            input.focus();
+          });
+
+          socket.addEventListener("message", (event) => {
+            for (const line of String(event.data).replace(/\r\n/g, "\n").split("\n")) {
+              if (line) addTaggedLine(line);
+            }
+          });
+
+          socket.addEventListener("close", () => {
+            if (intentionallyClosed) return;
+            const delay = Math.min(5000, 500 * 2 ** reconnectAttempt++);
+            setConnectionState("disconnected", "reconnecting");
+            addLine(`GTERM: disconnected; retrying in ${Math.ceil(delay / 1000)}s...`, "warn");
+            reconnectTimer = setTimeout(connect, delay);
+          });
+
+          socket.addEventListener("error", () => socket.close());
+        }
+
+        function execute(raw) {
+          const command = raw.trim();
+
+          if (!command) {
+            return;
+          }
+
+          addLine(`❯ ${command}`, "command");
+
+          history.push(command);
+
+          historyIndex = history.length;
+
+          const [name] = command.split(/\s+/);
+
+          // Manual clear command
+          if (name === "/clear") {
+            output.innerHTML = "";
+            return;
+          }
+
+          if (!socket || socket.readyState !== WebSocket.OPEN) {
+            addLine("GTERM is disconnected; command was not sent", "warn");
+            return;
+          }
+
+          socket.send(command);
+        }
+
+        form.addEventListener("submit", (event) => {
+          event.preventDefault();
+
+          execute(input.value);
+
+          input.value = "";
+        });
+
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "ArrowUp") {
+            event.preventDefault();
+
+            if (historyIndex > 0) {
+              historyIndex--;
+            }
+
+            input.value = history[historyIndex] ?? "";
+
+            queueMicrotask(() =>
+              input.setSelectionRange(input.value.length, input.value.length),
+            );
+          }
+
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+
+            if (historyIndex < history.length) {
+              historyIndex++;
+            }
+
+            input.value = history[historyIndex] ?? "";
+          }
+        });
+
+        connect();
+      })();
+    </script>
+  </body>
+</html>

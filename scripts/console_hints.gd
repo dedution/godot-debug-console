@@ -67,7 +67,7 @@ func process_suggestions(command: String) -> void:
 	if matches.has(parts[0]):
 		_clear_buttons()
 		return
-		
+
 	# Review this sorting...
 	if matches.size() > 0:
 		matches.sort_custom(_sort_command_matches)
