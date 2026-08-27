@@ -3,8 +3,8 @@ extends Node
 
 
 func run(handler: ConsoleHandler, command_full: String) -> void:
-	var commands = _split_commands(command_full)
-	for cmd in commands:
+	var command_list := _split_commands(command_full)
+	for cmd in command_list:
 		var tokens = _tokenize_command(cmd)
 		await _process_command(handler, tokens)
 
@@ -52,7 +52,7 @@ func _split_commands(command_full: String) -> Array[String]:
 
 
 func _process_command(handler: ConsoleHandler, tokens: Array) -> void:
-	var registered_commands: Dictionary = ConsoleCommands.commands.get_commands()
+	var registered_commands: Dictionary = Commands.get_commands()
 	if tokens.is_empty() or not registered_commands.has(tokens[0]):
 		handler.log_error("console", "Failed to execute command [i]%s[/i]" % tokens[0])
 		return

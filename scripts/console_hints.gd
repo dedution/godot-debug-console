@@ -30,7 +30,7 @@ func process_suggestions(command: String) -> void:
 		_clear_buttons()
 		return
 
-	var commands: Dictionary = ConsoleCommands.commands.get_commands()
+	var commands: Dictionary = Commands.get_commands()
 	var matches: Array[String] = []
 
 	var command_parts := command.split(";", false)

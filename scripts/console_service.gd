@@ -6,10 +6,14 @@ var console_manager: Node
 var _server: TCPServer = TCPServer.new()
 var _clients: Array[ConsoleServiceClient] = []
 
+## GTerm Remote Websockets service
+
 
 func _init(manager: Node) -> void:
 	console_manager = manager
 	name = "GTermWebsocketService"
+	console_manager.add_child(self)
+	Console.on_register_command.connect(send_commands_payload)
 
 
 func start_service(service_port: int = 3939) -> void:
@@ -45,9 +49,7 @@ func _accept_connections() -> void:
 			continue
 
 		var client := ConsoleServiceClient.new(websocket)
-
 		client.console_manager = console_manager
-
 		add_child(client)
 
 		_clients.append(client)
@@ -80,6 +82,22 @@ func _process_clients() -> void:
 
 func _initialize_client(client: ConsoleServiceClient) -> void:
 	client.mark_initialized()
+	send_commands_payload()
+
+
+func send_commands_payload() -> void:
+	var available_commands: Array[String] = []
+	var registered_commands := Commands.get_commands()
+	for command_name: String in registered_commands:
+		var command: Commands.RegisteredCommand = registered_commands[command_name]
+		if not command.hidden:
+			available_commands.append(command_name)
+
+	var payload := JSON.stringify({"type": "commands", "commands": available_commands})
+	for client: ConsoleServiceClient in _clients:
+		var peer := client.get_peer()
+		if peer != null and peer.get_ready_state() == WebSocketPeer.STATE_OPEN:
+			peer.send_text(payload)
 
 
 func _process_client_input(client: ConsoleServiceClient) -> void:
@@ -114,6 +132,8 @@ func _remove_client(client: ConsoleServiceClient) -> void:
 
 
 func _exit_tree() -> void:
+	Console.on_register_command.disconnect(send_commands_payload)
+
 	for client: ConsoleServiceClient in _clients.duplicate():
 		var peer := client.get_peer()
 
@@ -121,7 +141,5 @@ func _exit_tree() -> void:
 			peer.close(1001, "Server shutting down")
 
 		client.queue_free()
-
 	_clients.clear()
-
 	_server.stop()

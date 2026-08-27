@@ -1,5 +1,7 @@
 extends Node
 
+signal on_register_command
+
 const SCENE_PATH: String = "%s/scenes/console.tscn"
 const BANNER_PATH: String = "%s/graphics/intro.txt"
 const CONFIG_PATH: String = "%s/configs/settings.cfg"
@@ -25,9 +27,9 @@ func _enter_tree() -> void:
 
 	_load_configs()
 	_load_banner()
+	_start_service()
 	_register_commands()
 	_spawn_menu()
-	_start_service()
 	_start_web_interface()
 
 
@@ -44,15 +46,14 @@ func _load_configs() -> void:
 ## Loads and sets up the console controller
 func _spawn_menu() -> void:
 	var packed_scene = load(SCENE_PATH % _parent_folder)
-	var instance = packed_scene.instantiate()
-	add_child(instance)
-	console_controller = instance
+	console_controller = packed_scene.instantiate()
 	console_controller.console_manager = self
+	add_child(console_controller)
 
 
 func _register_commands() -> void:
-	ConsoleCommands.commands.register("/version", {}, _cmd_version, "Prints the console version")
-	ConsoleCommands.register_all()
+	Commands.register("/version", {}, _cmd_version, "Prints the console version")
+	Commands.register_all()
 
 
 func _cmd_version(handler: ConsoleHandler) -> void:
@@ -61,24 +62,28 @@ func _cmd_version(handler: ConsoleHandler) -> void:
 
 ## New CLI interface using the web browser for better access
 func _start_web_interface() -> void:
+	if _web_client != null:
+		push_error("GTerm web interface already running.")
+		return
+
 	var use_web_interface: bool = _console_config.get_value("console", "use_web_interface", true)
 	if not use_web_interface:
 		return
 
-	if _web_client == null:
-		_web_client = ConsoleWebClient.new(self)
-		add_child(_web_client)
+	_web_client = ConsoleWebClient.new(self)
 	_web_client.start_service(
-		_console_config.get_value("console", "web_port", 8080),
-		_console_config.get_value("console", "remote_port", 3939)
+		_console_config.get_value("console", "web_port", 6969),
+		_console_config.get_value("console", "service_port", 3939)
 	)
 
 
 func _start_service() -> void:
-	if _service == null:
-		_service = ConsoleService.new(self)
-		add_child(_service)
-	_service.start_service(_console_config.get_value("console", "remote_port", 3939))
+	if _service != null:
+		push_error("GTerm websocket service already running.")
+		return
+
+	_service = ConsoleService.new(self)
+	_service.start_service(_console_config.get_value("console", "service_port", 3939))
 
 
 func _load_banner() -> void:
@@ -118,6 +123,6 @@ func register_command(parameters: Dictionary) -> void:
 	var cmd_arguments: Dictionary = parameters.get("arguments", "")
 	var cmd_action: Callable = parameters.get("action", "")
 	var cmd_description: String = parameters.get("description", "")
-	ConsoleCommands.commands.register(cmd_name, cmd_arguments, cmd_action, cmd_description)
+	Commands.register(cmd_name, cmd_arguments, cmd_action, cmd_description)
 
 #endregion

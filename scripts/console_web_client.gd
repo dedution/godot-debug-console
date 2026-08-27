@@ -1,20 +1,21 @@
 class_name ConsoleWebClient
 extends Node
 
-## TODO: CLI web interface to interact with gterm. Need websocket interface
+## CLI web interface to interact with gterm. Connects to the websockets service
 
 var console_manager: Node
 var _server: TCPServer = TCPServer.new()
 var _http_clients: Array[Dictionary] = []
-var _interface_file: StringName = "/web/gterm_cli.html"
-var _font_file: StringName = "/fonts/RobotoMono-Regular.ttf"
-var _body_data: String = "<h1>Failed to load content. Contact admin.</h1>"
+var _interface_file: String = "/web/gterm_cli.html"
+var _font_file: String = "/fonts/RobotoMono-Regular.ttf"
+var _body_data: String = "<h1>Failed to load content. Contact admin nooby cola.</h1>"
 var _font_data: PackedByteArray = PackedByteArray()
 
 
 func _init(manager: Node):
 	console_manager = manager
 	self.name = "GTermWebInterface"
+	console_manager.add_child(self)
 
 	var root_folder: String = get_script().resource_path.get_base_dir().get_base_dir()
 	_body_data = _get_text_file_content(root_folder + _interface_file)
@@ -38,7 +39,7 @@ func _get_binary_file_content(file_path: String) -> PackedByteArray:
 
 
 func update_page_data(websocket_port: int) -> void:
-	var machine_ip := ConsoleCommands.get_local_ip()
+	var machine_ip := Commands.get_local_ip()
 	var banner: String = console_manager.get_banner() if console_manager else "Welcome to GTerm!"
 	banner = banner.replace("\r\n", "\n").trim_suffix("\n")
 	banner = _banner_to_html(banner)
@@ -110,7 +111,10 @@ func _process_http_clients() -> void:
 		var client: StreamPeerTCP = entry["peer"]
 		client.poll()
 
-		if client.get_status() == StreamPeerTCP.STATUS_NONE:
+		if (
+			client.get_status() == StreamPeerTCP.STATUS_NONE
+			or client.get_status() == StreamPeerTCP.STATUS_ERROR
+		):
 			_http_clients.erase(entry)
 			continue
 

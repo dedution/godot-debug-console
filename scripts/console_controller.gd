@@ -63,7 +63,7 @@ func _ready() -> void:
 	_process_transparent_elements()
 
 	# Register command to center window
-	ConsoleCommands.commands.register("/center", {}, _center_window, "Centers the console window")
+	Commands.register("/center", {}, _center_window, "Centers the console window")
 
 
 func _process_transparent_elements() -> void:

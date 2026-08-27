@@ -26,7 +26,6 @@ func mark_initialized() -> void:
 		return
 
 	_initialized = true
-
 	print("GTERM Web client connected!")
 
 
@@ -65,7 +64,7 @@ func print_remote(output: String) -> void:
 	if _owner.get_ready_state() != WebSocketPeer.STATE_OPEN:
 		return
 
-	_owner.send_text(output)
+	_owner.send_text(JSON.stringify({"type": "output", "output": output}))
 
 
 func log_rainbow(log_tag: String, output: String) -> void:

@@ -221,6 +221,7 @@
 
       .prompt-row {
         min-height: 52px;
+        position: relative;
 
         display: flex;
         align-items: center;
@@ -267,6 +268,43 @@
         font-size: 11px;
 
         margin-left: 10px;
+      }
+
+      .command-suggestions {
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 34px;
+        z-index: 1;
+
+        display: grid;
+        width: min(420px, calc(100% - 34px));
+        overflow: hidden;
+
+        border: 1px solid rgba(99, 230, 255, 0.25);
+        background: rgba(7, 17, 31, 0.96);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      }
+
+      .command-suggestions[hidden] {
+        display: none;
+      }
+
+      .command-suggestion {
+        padding: 8px 12px;
+
+        border: 0;
+        background: transparent;
+        color: var(--cyan-soft);
+
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .command-suggestion:hover,
+      .command-suggestion.selected {
+        background: rgba(99, 230, 255, 0.12);
+        color: var(--cyan);
       }
 
       .boot-cursor {
@@ -331,18 +369,28 @@
           <div id="output" class="output" aria-live="polite"></div>
 
           <form id="cli-form" class="prompt-row" autocomplete="off">
+            <div
+              id="command-suggestions"
+              class="command-suggestions"
+              role="listbox"
+              hidden
+            ></div>
+
             <span class="prompt-sign"> ❯ </span>
 
             <input
               id="command"
               type="text"
+              aria-autocomplete="list"
+              aria-controls="command-suggestions"
+              aria-expanded="false"
               spellcheck="false"
               autocomplete="off"
               autofocus
               placeholder="enter command…"
             />
 
-            <span class="hint"> ↑↓ history · Enter execute </span>
+            <span class="hint"> ↑↓ history · Tab complete · Enter execute </span>
           </form>
         </div>
       </section>
@@ -356,9 +404,89 @@
 
         const input = document.getElementById("command");
 
+        const suggestions = document.getElementById("command-suggestions");
+
         const history = [];
 
         let historyIndex = 0;
+
+        let commands = [];
+
+        let visibleSuggestions = [];
+
+        const MAX_SUGGESTIONS = 5;
+
+        const hideSuggestions = () => {
+          visibleSuggestions = [];
+          suggestions.hidden = true;
+          suggestions.replaceChildren();
+          input.setAttribute("aria-expanded", "false");
+        };
+
+        const getActiveCommandRange = () => {
+          const cursor = input.selectionStart ?? input.value.length;
+          const start = input.value.lastIndexOf(";", cursor - 1) + 1;
+          const nextSeparator = input.value.indexOf(";", cursor);
+          const end = nextSeparator === -1 ? input.value.length : nextSeparator;
+
+          return { start, end };
+        };
+
+        const renderSuggestions = () => {
+          const fragment = document.createDocumentFragment();
+
+          visibleSuggestions.forEach((command, index) => {
+            const suggestion = document.createElement("button");
+            suggestion.type = "button";
+            suggestion.className = `command-suggestion${index === 0 ? " selected" : ""}`;
+            suggestion.dataset.command = command;
+            suggestion.textContent = command;
+            suggestion.setAttribute("role", "option");
+            suggestion.setAttribute("aria-selected", String(index === 0));
+            fragment.appendChild(suggestion);
+          });
+
+          suggestions.replaceChildren(fragment);
+          suggestions.hidden = visibleSuggestions.length === 0;
+          input.setAttribute("aria-expanded", String(visibleSuggestions.length > 0));
+        };
+
+        const updateSuggestions = () => {
+          const { start, end } = getActiveCommandRange();
+          const activeCommand = input.value.slice(start, end).trim();
+
+          if (!activeCommand || /\s/.test(activeCommand)) {
+            hideSuggestions();
+            return;
+          }
+
+          const prefix = activeCommand.replace(/^\//, "").toLowerCase();
+          visibleSuggestions = commands
+            .filter((command) =>
+              command.replace(/^\//, "").toLowerCase().startsWith(prefix),
+            )
+            .filter((command) => command !== activeCommand)
+            .sort(
+              (a, b) =>
+                a.length - b.length ||
+                a.localeCompare(b, undefined, {
+                  numeric: true,
+                  sensitivity: "base",
+                }),
+            )
+            .slice(0, MAX_SUGGESTIONS);
+          renderSuggestions();
+        };
+
+        const completeCommand = (command) => {
+          const { start, end } = getActiveCommandRange();
+          input.value = `${input.value.slice(0, start)}${command}${input.value.slice(end)}`;
+
+          const caret = start + command.length;
+          input.setSelectionRange(caret, caret);
+          hideSuggestions();
+          input.focus();
+        };
 
         const addLine = (text = "", cls = "") => {
           const line = document.createElement("div");
@@ -418,6 +546,7 @@
         let reconnectTimer = null;
         let reconnectAttempt = 0;
         let intentionallyClosed = false;
+        let disconnectReported = false;
 
         function setConnectionState(state, label) {
           connectionPill.className = `connection-pill ${state}`.trim();
@@ -429,21 +558,41 @@
             return;
           }
 
-          addLine(`connecting to ${websocketUrl}...`, "dim");
           setConnectionState("", "connecting");
           socket = new WebSocket(websocketUrl);
 
           socket.addEventListener("open", () => {
             reconnectAttempt = 0;
+            disconnectReported = false;
             setConnectionState("connected", "connected");
             addLine("GTERM: connected", "good");
             addLine('Type "/help" for available commands.');
-            
+
             input.focus();
           });
 
           socket.addEventListener("message", (event) => {
-            for (const line of String(event.data).replace(/\r\n/g, "\n").split("\n")) {
+            const message = String(event.data);
+            let outputMessage = message;
+
+            try {
+              const payload = JSON.parse(message);
+              if (payload.type === "commands" && Array.isArray(payload.commands)) {
+                commands = payload.commands.filter((command) => typeof command === "string");
+                updateSuggestions();
+                return;
+              }
+
+              if (payload.type === "output" && typeof payload.output === "string") {
+                outputMessage = payload.output;
+              } else {
+                return;
+              }
+            } catch (_) {
+              // Preserve compatibility with plain-text servers.
+            }
+
+            for (const line of outputMessage.replace(/\r\n/g, "\n").split("\n")) {
               if (line) addTaggedLine(line);
             }
           });
@@ -452,7 +601,11 @@
             if (intentionallyClosed) return;
             const delay = Math.min(5000, 500 * 2 ** reconnectAttempt++);
             setConnectionState("disconnected", "reconnecting");
-            addLine(`GTERM: disconnected; retrying in ${Math.ceil(delay / 1000)}s...`, "warn");
+            if (!disconnectReported) {
+              disconnectReported = true;
+              addLine("GTERM: disconnected", "warn");
+              addLine(`connecting to ${websocketUrl}...`, "dim");
+            }
             reconnectTimer = setTimeout(connect, delay);
           });
 
@@ -494,9 +647,32 @@
           execute(input.value);
 
           input.value = "";
+          hideSuggestions();
+        });
+
+        input.addEventListener("input", updateSuggestions);
+        input.addEventListener("click", updateSuggestions);
+        input.addEventListener("blur", hideSuggestions);
+
+        suggestions.addEventListener("mousedown", (event) => event.preventDefault());
+        suggestions.addEventListener("click", (event) => {
+          const suggestion = event.target.closest(".command-suggestion");
+          if (suggestion) completeCommand(suggestion.dataset.command);
         });
 
         input.addEventListener("keydown", (event) => {
+          if (event.key === "Tab" && visibleSuggestions.length > 0) {
+            event.preventDefault();
+            completeCommand(visibleSuggestions[0]);
+            return;
+          }
+
+          if (event.key === "Escape" && visibleSuggestions.length > 0) {
+            event.preventDefault();
+            hideSuggestions();
+            return;
+          }
+
           if (event.key === "ArrowUp") {
             event.preventDefault();
 
@@ -505,6 +681,7 @@
             }
 
             input.value = history[historyIndex] ?? "";
+            updateSuggestions();
 
             queueMicrotask(() =>
               input.setSelectionRange(input.value.length, input.value.length),
@@ -519,6 +696,7 @@
             }
 
             input.value = history[historyIndex] ?? "";
+            updateSuggestions();
           }
         });
 

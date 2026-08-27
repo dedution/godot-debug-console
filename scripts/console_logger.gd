@@ -2,7 +2,7 @@ class_name ConsoleLogger
 extends Control
 
 const MAX_LOGS: int = 300
-var console_manager: Node
+var console_manager: Console
 var _logs: Array[String] = []
 
 @onready var _command_logger: RichTextLabel = $Logs
